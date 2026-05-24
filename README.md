@@ -1,4 +1,4 @@
-#  MERN Furniture Store (In Progress)
+#  MERN Furniture Store 
 
 A full-stack e-commerce platform for furniture shopping.
 
