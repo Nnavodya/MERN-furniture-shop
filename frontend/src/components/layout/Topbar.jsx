@@ -2,7 +2,7 @@ import React from 'react'
 
 const Topbar = () => {
   return (
-    <div>
+    <div className="bg-[#ea20e] text-white">
       
     </div>
   )
