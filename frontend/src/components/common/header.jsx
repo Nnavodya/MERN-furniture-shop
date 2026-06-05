@@ -126,7 +126,13 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0 no-underline">
-            <TbArmchair className="h-8 w-8" style={{ color: C.accent }} />
+            <TbArmchair
+  className="h-8 w-8"
+  style={{
+    color: C.accent,
+    filter: 'drop-shadow(0 0 6px rgba(212,163,115,.5))'
+  }}
+/>
             <span className="text-2xl font-extrabold tracking-tight" style={{ color: C.text }}>
               Furni<span style={{ color: C.accent }}>Hub</span>
             </span>
