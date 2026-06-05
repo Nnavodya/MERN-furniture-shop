@@ -54,7 +54,9 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
         color:        active ? C.accent    : C.textNav,
         opacity:      active ? 1           : 0.7,
         background:   active ? C.accentMid : 'transparent',
-        borderBottom: active ? `2px solid ${C.accent}` : '2px solid transparent',
+       borderBottom: active? `3px solid ${C.accent}`: '3px solid transparent',
+
+      boxShadow: active? `0 4px 15px rgba(212,163,115,.15)`: 'none',
       }}
       onMouseEnter={e => {
         if (!active) {
@@ -190,7 +192,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               <TbSearch className="h-4 w-4 shrink-0" style={{ color: C.accent }} />
               <input
                 type="text"
-                placeholder="Search furniture..."
+                placeholder="Search sofas, tables, chairs..."
                 className="bg-transparent border-none outline-none text-sm w-32"
                 style={{ color: C.text }}
               />
