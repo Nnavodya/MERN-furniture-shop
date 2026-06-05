@@ -133,7 +133,8 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
     filter: 'drop-shadow(0 0 6px rgba(212,163,115,.5))'
   }}
 />
-            <span className="text-2xl font-extrabold tracking-tight" style={{ color: C.text }}>
+            <span className="text-2xl font-bold tracking-wide"style={{ color: C.text }}
+>
               Furni<span style={{ color: C.accent }}>Hub</span>
             </span>
           </Link>
