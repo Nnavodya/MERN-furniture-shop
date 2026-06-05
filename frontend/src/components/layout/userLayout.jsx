@@ -1,9 +1,9 @@
 import React from 'react'
-
+import Header from './common/header'
 const userLayout = () => {
   return (
     <>
-      {/*Header*/}
+      <Header />
       {/*Main Content*/}
       {/*Footer*/}
     </>

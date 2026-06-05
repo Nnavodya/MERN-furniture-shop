@@ -123,7 +123,7 @@ export default App;*/
 
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import UserLayout from "./components/layout/userLayout";
+import UserLayout from "./components/layout/UserLayout";
 
 function App() {
   return (
