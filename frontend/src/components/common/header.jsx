@@ -248,7 +248,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               className="text-xs px-2 py-1 font-medium whitespace-nowrap"
               style={{ color: C.accent }}
             >
-              🔥 New Arrivals
+              ✨ New Arrivals
             </Link>
           </div>
         </div>
