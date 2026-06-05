@@ -121,7 +121,13 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
     <>
       <Topbar />
 
-      <header style={{ background: C.navBg, color: C.text }} className="sticky top-0 z-50">
+      <header style={{
+    background: C.navBg,
+    color: C.text,
+    boxShadow: '0 8px 25px rgba(0,0,0,0.25)'
+  }}
+  className="sticky top-0 z-50"
+>
 
         {/* ── Main Row ── */}
         <div className="container mx-auto px-4 flex items-center justify-between h-[70px] gap-4">
