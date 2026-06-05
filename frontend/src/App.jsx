@@ -127,6 +127,18 @@ function App() {
       <h1 className="text-5xl font-bold text-white">
         FurniHub 🪑
       </h1>
+      <BrowserRouter>
+        <Routes>
+          <Route>{/* User Layout */}</Route>
+          <Route>{/* Admin Layout */}</Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+        </Routes>
+      </BrowserRouter>
+  
     </div>
   );
 }
