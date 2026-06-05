@@ -193,7 +193,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               <input
                 type="text"
                 placeholder="Search sofas, tables, chairs..."
-                className="bg-transparent border-none outline-none text-sm w-32"
+                className="bg-transparent border-none outline-none text-sm w-40"
                 style={{ color: C.text }}
               />
             </div>
