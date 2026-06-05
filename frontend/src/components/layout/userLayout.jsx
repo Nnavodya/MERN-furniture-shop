@@ -7,7 +7,7 @@ const userLayout = () => {
       {/*Main Content*/}
       {/*Footer*/}
     </>
-  )
-}
+  );
+};
 
 export default userLayout;
