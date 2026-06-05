@@ -9,14 +9,19 @@ import {
 
 // ── Design Tokens ──────────────────────────────────────
 const C = {
+  // Topbar
+  topbarBg:     '#1A3A2A',   // Deep Forest Green
+  topbarPromo:  '#A8D5B5',   // Soft mint green for promo text
+
+  // Navbar
   navBg:        '#1B2A4A',   // Navy Blue
-  navSecondary: '#253655',   // Slightly lighter navy (search bar, dropdown)
-  navHover:     '#2A3F6A',   // Hover state navy
-  accent:       '#D4A373',   // Warm Gold (unchanged)
+  navSecondary: '#253655',   // Lighter navy (search, dropdown)
+  accent:       '#D4A373',   // Warm Gold
   accentMid:    'rgba(212,163,115,0.12)',
   accentBorder: 'rgba(212,163,115,0.25)',
-  text:         '#F5E6D3',   // Soft Beige (unchanged)
-  textMuted:    'rgba(232,237,245,0.65)',
+  text:         '#F5E6D3',   // Soft Beige
+  textNav:      '#E8EDF5',   // Slightly cool white for nav
+  textMuted:    'rgba(232,237,245,0.60)',
   divider:      'rgba(212,163,115,0.10)',
 }
 
@@ -41,8 +46,8 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
       to={to}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all duration-150"
       style={{
-        color:        active ? C.accent  : '#E8EDF5',
-        opacity:      active ? 1         : 0.7,
+        color:        active ? C.accent    : C.textNav,
+        opacity:      active ? 1           : 0.7,
         background:   active ? C.accentMid : 'transparent',
         borderBottom: active ? `2px solid ${C.accent}` : '2px solid transparent',
       }}
@@ -56,7 +61,7 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
       onMouseLeave={e => {
         if (!active) {
           e.currentTarget.style.opacity    = '0.7'
-          e.currentTarget.style.color      = '#E8EDF5'
+          e.currentTarget.style.color      = C.textNav
           e.currentTarget.style.background = 'transparent'
         }
       }}
@@ -74,18 +79,18 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
     to={to}
     aria-label={label}
     className="relative p-2 rounded-lg flex items-center justify-center transition-all duration-150"
-    style={{ border: `0.5px solid ${C.accentBorder}`, color: '#E8EDF5', opacity: 0.75 }}
+    style={{ border: `0.5px solid ${C.accentBorder}`, color: C.textNav, opacity: 0.75 }}
     onMouseEnter={e => {
-      e.currentTarget.style.background   = C.accentMid
-      e.currentTarget.style.borderColor  = C.accent
-      e.currentTarget.style.color        = C.accent
-      e.currentTarget.style.opacity      = '1'
+      e.currentTarget.style.background  = C.accentMid
+      e.currentTarget.style.borderColor = C.accent
+      e.currentTarget.style.color       = C.accent
+      e.currentTarget.style.opacity     = '1'
     }}
     onMouseLeave={e => {
-      e.currentTarget.style.background   = 'transparent'
-      e.currentTarget.style.borderColor  = C.accentBorder
-      e.currentTarget.style.color        = '#E8EDF5'
-      e.currentTarget.style.opacity      = '0.75'
+      e.currentTarget.style.background  = 'transparent'
+      e.currentTarget.style.borderColor = C.accentBorder
+      e.currentTarget.style.color       = C.textNav
+      e.currentTarget.style.opacity     = '0.75'
     }}
   >
     <Icon className="h-5 w-5" />
@@ -107,7 +112,6 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
 
   return (
     <>
-      {/* Topbar keeps its original warm brown color */}
       <Topbar />
 
       <header style={{ background: C.navBg, color: C.text }} className="sticky top-0 z-50">
@@ -127,21 +131,16 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
           <nav className="hidden lg:flex items-center gap-1">
             <NavLink to="/"        icon={TbHome}>Home</NavLink>
 
-            {/* Products Dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setDropdown(true)}
               onMouseLeave={() => setDropdown(false)}
             >
               <NavLink to="/products" icon={TbLayoutGrid} dropdown>Products</NavLink>
-
               {showDropdown && (
                 <div
                   className="absolute top-full left-0 mt-1 w-52 rounded-xl py-2 z-50"
-                  style={{
-                    background: C.navSecondary,
-                    border: `0.5px solid ${C.accentBorder}`,
-                  }}
+                  style={{ background: C.navSecondary, border: `0.5px solid ${C.accentBorder}` }}
                 >
                   {categories.map((cat) => (
                     <Link
@@ -172,16 +171,9 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-
-            {/* Search */}
             <div
-              className="hidden md:flex items-center rounded-lg px-3 py-2 gap-2 transition-all duration-150"
-              style={{
-                background: C.navSecondary,
-                border: `0.5px solid ${C.accentBorder}`,
-              }}
-              onFocus={e  => e.currentTarget.style.borderColor = C.accent}
-              onBlur={e   => e.currentTarget.style.borderColor = C.accentBorder}
+              className="hidden md:flex items-center rounded-lg px-3 py-2 gap-2"
+              style={{ background: C.navSecondary, border: `0.5px solid ${C.accentBorder}` }}
             >
               <TbSearch className="h-4 w-4 shrink-0" style={{ color: C.accent }} />
               <input
@@ -196,9 +188,8 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
             <IconBtn to="/cart"     label="Cart"     icon={TbShoppingCart} count={cartCount}     />
             <IconBtn to="/account"  label="Account"  icon={TbUser}         count={0}             />
 
-            {/* Mobile Toggle */}
             <button
-              className="lg:hidden p-2 rounded-lg transition-colors"
+              className="lg:hidden p-2 rounded-lg"
               style={{ border: `0.5px solid ${C.accentBorder}`, color: C.text }}
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
@@ -213,9 +204,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
           <div className="container mx-auto px-4 flex items-center gap-1 h-10 overflow-x-auto scrollbar-none">
             {categories.map((cat, i) => (
               <React.Fragment key={cat.path}>
-                {i > 0 && (
-                  <span className="text-xs" style={{ color: 'rgba(212,163,115,0.2)' }}>·</span>
-                )}
+                {i > 0 && <span className="text-xs" style={{ color: 'rgba(212,163,115,0.2)' }}>·</span>}
                 <Link
                   to={`/products?category=${cat.path}`}
                   className="text-xs px-2 py-1 rounded whitespace-nowrap transition-all duration-150"
@@ -250,7 +239,6 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
             className="lg:hidden px-4 py-4 space-y-1"
             style={{ borderTop: `1px solid ${C.divider}`, background: C.navBg }}
           >
-            {/* Mobile Search */}
             <div
               className="flex items-center rounded-lg px-3 py-2 gap-2 mb-3"
               style={{ background: C.navSecondary, border: `0.5px solid ${C.accentBorder}` }}
@@ -264,7 +252,6 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               />
             </div>
 
-            {/* Mobile Nav Links */}
             {[
               { to: '/',         icon: TbHome,       label: 'Home'     },
               { to: '/products', icon: TbLayoutGrid, label: 'Products' },
@@ -277,14 +264,14 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
                 to={to}
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors"
-                style={{ color: '#E8EDF5', opacity: 0.75 }}
+                style={{ color: C.textNav, opacity: 0.75 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.color      = C.accent
                   e.currentTarget.style.background = C.accentMid
                   e.currentTarget.style.opacity    = '1'
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.color      = '#E8EDF5'
+                  e.currentTarget.style.color      = C.textNav
                   e.currentTarget.style.background = 'transparent'
                   e.currentTarget.style.opacity    = '0.75'
                 }}
@@ -293,11 +280,8 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               </Link>
             ))}
 
-            {/* Mobile Categories */}
             <div className="pt-3" style={{ borderTop: `1px solid ${C.divider}` }}>
-              <p className="text-xs px-3 mb-2" style={{ color: C.accent, opacity: 0.7 }}>
-                Categories
-              </p>
+              <p className="text-xs px-3 mb-2" style={{ color: C.accent, opacity: 0.7 }}>Categories</p>
               <div className="grid grid-cols-2 gap-1">
                 {categories.map((cat) => (
                   <Link
