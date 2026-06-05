@@ -124,14 +124,18 @@ export default App;*/
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserLayout from "./components/layout/UserLayout";
+import Header from './components/common/Header'
+import Home from './pages/Home'
+import Products from './pages/Products'
+import ProductDetails from './pages/ProductDetails'
+import Cart from './pages/Cart'
+import Checkout from './pages/Checkout'
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-      <h1 className="text-5xl font-bold text-white">
-        FurniHub 🪑
-      </h1>
-      <BrowserRouter>
+    <BrowserRouter>
+      <Header />
+      <main className="min-h-screen bg-slate-900">
         <Routes>
           <Route path="/user" element={<UserLayout />} />{/* User Layout */}
           {/* Admin Layout route removed (placeholder) */}
@@ -141,9 +145,8 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
         </Routes>
-      </BrowserRouter>
-  
-    </div>
+      </main>
+    </BrowserRouter>
   );
 }
 
