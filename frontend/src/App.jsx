@@ -121,6 +121,10 @@ function App() {
 
 export default App;*/
 
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import UserLayout from "./components/layout/userLayout";
+
 function App() {
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -129,8 +133,8 @@ function App() {
       </h1>
       <BrowserRouter>
         <Routes>
-          <Route>{/* User Layout */}</Route>
-          <Route>{/* Admin Layout */}</Route>
+          <Route path="/user" element={<UserLayout />} />{/* User Layout */}
+          {/* Admin Layout route removed (placeholder) */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetails />} />

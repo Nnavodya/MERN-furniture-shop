@@ -2,9 +2,11 @@ import React from 'react'
 
 const userLayout = () => {
   return (
-    <div>
-      userLayout
-    </div>
+    <>
+      {/*Header*/}
+      {/*Main Content*/}
+      {/*Footer*/}
+    </>
   )
 }
 
