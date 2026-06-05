@@ -9,20 +9,25 @@ import {
 
 // ── Design Tokens ──────────────────────────────────────
 const C = {
-  // Topbar
-  topbarBg:     '#1A3A2A',   // Deep Forest Green
-  topbarPromo:  '#A8D5B5',   // Soft mint green for promo text
+  // ───── Top Bar ─────
+  topbarBg: '#2A1810',
+  topbarText: '#F5E6D3',
+  topbarPromo: '#D4A373',
 
-  // Navbar
-  navBg:        '#1B2A4A',   // Navy Blue
-  navSecondary: '#253655',   // Lighter navy (search, dropdown)
-  accent:       '#D4A373',   // Warm Gold
-  accentMid:    'rgba(212,163,115,0.12)',
+  // ───── Main Navbar ─────
+  navBg: '#1C120D',
+  navSecondary: '#2A1B13',
+
+  accent: '#D4A373',
+
+  accentMid: 'rgba(212,163,115,0.12)',
   accentBorder: 'rgba(212,163,115,0.25)',
-  text:         '#F5E6D3',   // Soft Beige
-  textNav:      '#E8EDF5',   // Slightly cool white for nav
-  textMuted:    'rgba(232,237,245,0.60)',
-  divider:      'rgba(212,163,115,0.10)',
+
+  text: '#F5E6D3',
+  textNav: '#F8F1E8',
+  textMuted: 'rgba(245,230,211,0.65)',
+
+  divider: 'rgba(212,163,115,0.12)',
 }
 
 const categories = [
