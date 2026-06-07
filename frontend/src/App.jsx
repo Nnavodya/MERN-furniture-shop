@@ -121,7 +121,7 @@ function App() {
 
 export default App;*/
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserLayout from "./components/layout/UserLayout";
 import Header from './components/common/Header'
@@ -130,9 +130,10 @@ import Products from './pages/Products'
 import ProductDetails from './pages/ProductDetails'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import { CartProvider, CartContext } from './context/CartContext'
 
-function App() {
-  const [cartCount, setCartCount] = useState(0)
+function AppContent() {
+  const { cartCount } = useContext(CartContext)
   const [wishlistCount, setWishlistCount] = useState(0)
 
   return (
@@ -149,6 +150,14 @@ function App() {
         </Routes>
       </main>
     </BrowserRouter>
+  );
+}
+
+function App() {
+  return (
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
   );
 }
 
