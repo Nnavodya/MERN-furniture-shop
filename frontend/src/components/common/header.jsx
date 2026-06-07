@@ -7,20 +7,27 @@ import {
   TbShoppingCart, TbUser, TbChevronDown, TbX, TbMenu2
 } from 'react-icons/tb'
 
-// ── Design Tokens ──────────────────────────────────────
+// ── Design Tokens (Light Theme) ────────────────────────
 const C = {
-  topbarBg: '#2A1810',
-  topbarText: '#F5E6D3',
-  topbarPromo: '#D4A373',
-  navBg: '#1C120D',
-  navSecondary: '#2A1B13',
-  accent: '#D4A373',
-  accentMid: 'rgba(212,163,115,0.12)',
-  accentBorder: 'rgba(212,163,115,0.25)',
-  text: '#F5E6D3',
-  textNav: '#F8F1E8',
-  textMuted: 'rgba(245,230,211,0.65)',
-  divider: 'rgba(212,163,115,0.12)',
+  // ───── Top Bar ─────
+  topbarBg: '#F5EDE0',
+  topbarText: '#5C3D1E',
+  topbarPromo: '#8B5E2E',
+
+  // ───── Main Navbar ─────
+  navBg: '#FFFFFF',
+  navSecondary: '#FBF7F2',
+
+  accent: '#8B5E2E',
+  accentMid: 'rgba(139,94,46,0.08)',
+  accentBorder: 'rgba(139,94,46,0.20)',
+
+  text: '#2C1A0E',
+  textNav: '#3D2410',
+  textMuted: 'rgba(44,26,14,0.55)',
+
+  divider: 'rgba(139,94,46,0.12)',
+  shadow: '0 2px 16px rgba(44,26,14,0.08)',
 }
 
 const categories = [
@@ -44,11 +51,12 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
       to={to}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all duration-150"
       style={{
-        color:        active ? C.accent    : C.textNav,
-        opacity:      active ? 1           : 0.7,
+        color:        active ? C.accent  : C.textNav,
+        opacity:      active ? 1         : 0.75,
         background:   active ? C.accentMid : 'transparent',
         borderBottom: active ? `3px solid ${C.accent}` : '3px solid transparent',
-        boxShadow:    active ? `0 4px 15px rgba(212,163,115,.15)` : 'none',
+        boxShadow:    active ? `0 4px 15px rgba(139,94,46,.10)` : 'none',
+        fontWeight:   active ? '600' : '400',
       }}
       onMouseEnter={e => {
         if (!active) {
@@ -59,7 +67,7 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
       }}
       onMouseLeave={e => {
         if (!active) {
-          e.currentTarget.style.opacity    = '0.7'
+          e.currentTarget.style.opacity    = '0.75'
           e.currentTarget.style.color      = C.textNav
           e.currentTarget.style.background = 'transparent'
         }
@@ -78,7 +86,7 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
     to={to}
     aria-label={label}
     className="relative p-2 rounded-lg flex items-center justify-center transition-all duration-150"
-    style={{ border: `0.5px solid ${C.accentBorder}`, color: C.textNav, opacity: 0.75 }}
+    style={{ border: `0.5px solid ${C.accentBorder}`, color: C.textNav, opacity: 0.7 }}
     onMouseEnter={e => {
       e.currentTarget.style.background  = C.accentMid
       e.currentTarget.style.borderColor = C.accent
@@ -89,7 +97,7 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
       e.currentTarget.style.background  = 'transparent'
       e.currentTarget.style.borderColor = C.accentBorder
       e.currentTarget.style.color       = C.textNav
-      e.currentTarget.style.opacity     = '0.75'
+      e.currentTarget.style.opacity     = '0.7'
     }}
   >
     <Icon className="h-5 w-5" />
@@ -99,7 +107,7 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
           position: 'absolute',
           top: '-8px',
           right: '-8px',
-          background: '#E53935',        // ← red circle
+          background: '#E53935',
           color: '#FFFFFF',
           fontSize: '10px',
           fontWeight: '700',
@@ -110,7 +118,7 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
           alignItems: 'center',
           justifyContent: 'center',
           lineHeight: 1,
-          boxShadow: '0 0 0 2px #1C120D', // ← navbar bg වලින් ring එකක් දාලා detach කළා
+          boxShadow: '0 0 0 2px #FFFFFF', // light theme — white ring
           pointerEvents: 'none',
         }}
       >
@@ -133,7 +141,8 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
         style={{
           background: C.navBg,
           color: C.text,
-          boxShadow: '0 8px 25px rgba(0,0,0,0.25)'
+          boxShadow: C.shadow,
+          borderBottom: `1px solid ${C.divider}`,
         }}
         className="sticky top-0 z-50"
       >
@@ -146,7 +155,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               className="h-8 w-8"
               style={{
                 color: C.accent,
-                filter: 'drop-shadow(0 0 6px rgba(212,163,115,.5))'
+                filter: 'drop-shadow(0 0 4px rgba(139,94,46,.25))'
               }}
             />
             <span className="text-2xl font-bold tracking-wide" style={{ color: C.text }}>
@@ -167,7 +176,11 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               {showDropdown && (
                 <div
                   className="absolute top-full left-0 mt-1 w-52 rounded-xl py-2 z-50"
-                  style={{ background: C.navSecondary, border: `0.5px solid ${C.accentBorder}` }}
+                  style={{
+                    background: '#FFFFFF',
+                    border: `0.5px solid ${C.accentBorder}`,
+                    boxShadow: '0 8px 24px rgba(44,26,14,0.10)',
+                  }}
                 >
                   {categories.map((cat) => (
                     <Link
@@ -231,7 +244,9 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
           <div className="container mx-auto px-4 flex items-center gap-1 h-10 overflow-x-auto scrollbar-none">
             {categories.map((cat, i) => (
               <React.Fragment key={cat.path}>
-                {i > 0 && <span className="text-xs" style={{ color: 'rgba(212,163,115,0.2)' }}>·</span>}
+                {i > 0 && (
+                  <span className="text-xs" style={{ color: 'rgba(139,94,46,0.25)' }}>·</span>
+                )}
                 <Link
                   to={`/products?category=${cat.path}`}
                   className="text-xs px-2 py-1 rounded whitespace-nowrap transition-all duration-150"
@@ -249,7 +264,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
                 </Link>
               </React.Fragment>
             ))}
-            <span className="text-xs" style={{ color: 'rgba(212,163,115,0.2)' }}>·</span>
+            <span className="text-xs" style={{ color: 'rgba(139,94,46,0.25)' }}>·</span>
             <Link
               to="/products?filter=new"
               className="text-xs px-2 py-1 font-medium whitespace-nowrap"
@@ -308,7 +323,9 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
             ))}
 
             <div className="pt-3" style={{ borderTop: `1px solid ${C.divider}` }}>
-              <p className="text-xs px-3 mb-2" style={{ color: C.accent, opacity: 0.7 }}>Categories</p>
+              <p className="text-xs px-3 mb-2" style={{ color: C.accent, opacity: 0.8 }}>
+                Categories
+              </p>
               <div className="grid grid-cols-2 gap-1">
                 {categories.map((cat) => (
                   <Link
