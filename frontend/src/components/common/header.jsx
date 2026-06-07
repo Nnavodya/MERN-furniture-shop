@@ -9,24 +9,17 @@ import {
 
 // ── Design Tokens ──────────────────────────────────────
 const C = {
-  // ───── Top Bar ─────
   topbarBg: '#2A1810',
   topbarText: '#F5E6D3',
   topbarPromo: '#D4A373',
-
-  // ───── Main Navbar ─────
   navBg: '#1C120D',
   navSecondary: '#2A1B13',
-
   accent: '#D4A373',
-
   accentMid: 'rgba(212,163,115,0.12)',
   accentBorder: 'rgba(212,163,115,0.25)',
-
   text: '#F5E6D3',
   textNav: '#F8F1E8',
   textMuted: 'rgba(245,230,211,0.65)',
-
   divider: 'rgba(212,163,115,0.12)',
 }
 
@@ -54,9 +47,8 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
         color:        active ? C.accent    : C.textNav,
         opacity:      active ? 1           : 0.7,
         background:   active ? C.accentMid : 'transparent',
-       borderBottom: active? `3px solid ${C.accent}`: '3px solid transparent',
-
-      boxShadow: active? `0 4px 15px rgba(212,163,115,.15)`: 'none',
+        borderBottom: active ? `3px solid ${C.accent}` : '3px solid transparent',
+        boxShadow:    active ? `0 4px 15px rgba(212,163,115,.15)` : 'none',
       }}
       onMouseEnter={e => {
         if (!active) {
@@ -103,10 +95,26 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
     <Icon className="h-5 w-5" />
     {count > 0 && (
       <span
-        className="absolute -top-1.5 -right-1.5 text-[10px] font-bold rounded-full h-[17px] w-[17px] flex items-center justify-center"
-        style={{ background: C.accent, color: C.navBg }}
+        style={{
+          position: 'absolute',
+          top: '-8px',
+          right: '-8px',
+          background: '#E53935',        // ← red circle
+          color: '#FFFFFF',
+          fontSize: '10px',
+          fontWeight: '700',
+          borderRadius: '50%',
+          height: '18px',
+          width: '18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          lineHeight: 1,
+          boxShadow: '0 0 0 2px #1C120D', // ← navbar bg වලින් ring එකක් දාලා detach කළා
+          pointerEvents: 'none',
+        }}
       >
-        {count}
+        {count > 99 ? '99+' : count}
       </span>
     )}
   </Link>
@@ -121,35 +129,34 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
     <>
       <Topbar />
 
-      <header style={{
-    background: C.navBg,
-    color: C.text,
-    boxShadow: '0 8px 25px rgba(0,0,0,0.25)'
-  }}
-  className="sticky top-0 z-50"
->
-
+      <header
+        style={{
+          background: C.navBg,
+          color: C.text,
+          boxShadow: '0 8px 25px rgba(0,0,0,0.25)'
+        }}
+        className="sticky top-0 z-50"
+      >
         {/* ── Main Row ── */}
         <div className="container mx-auto px-4 flex items-center justify-between h-[70px] gap-4">
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0 no-underline">
             <TbArmchair
-  className="h-8 w-8"
-  style={{
-    color: C.accent,
-    filter: 'drop-shadow(0 0 6px rgba(212,163,115,.5))'
-  }}
-/>
-            <span className="text-2xl font-bold tracking-wide"style={{ color: C.text }}
->
+              className="h-8 w-8"
+              style={{
+                color: C.accent,
+                filter: 'drop-shadow(0 0 6px rgba(212,163,115,.5))'
+              }}
+            />
+            <span className="text-2xl font-bold tracking-wide" style={{ color: C.text }}>
               Furni<span style={{ color: C.accent }}>Hub</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            <NavLink to="/"        icon={TbHome}>Home</NavLink>
+            <NavLink to="/" icon={TbHome}>Home</NavLink>
 
             <div
               className="relative"
