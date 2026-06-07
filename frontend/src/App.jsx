@@ -132,12 +132,12 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 
 function App() {
-  const [cartCount, setCartCount] = useState(0)        // ← add
-  const [wishlistCount, setWishlistCount] = useState(0) // ← add
+  const [cartCount, setCartCount] = useState(0)
+  const [wishlistCount, setWishlistCount] = useState(0)
 
   return (
     <BrowserRouter>
-      <Header cartCount={cartCount} wishlistCount={wishlistCount} /> {/* ← fix */}
+      <Header cartCount={cartCount} wishlistCount={wishlistCount} />
       <main className="min-h-screen bg-slate-900">
         <Routes>
           <Route path="/user" element={<UserLayout />} />

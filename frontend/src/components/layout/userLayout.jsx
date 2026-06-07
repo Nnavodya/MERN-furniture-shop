@@ -1,10 +1,9 @@
 import React from 'react'
-import Header from '../common/Header'
 
 const UserLayout = () => {
   return (
     <>
-      <Header />
+      {/* Header remove කළා — App.jsx එකේ දාලා තියෙනවා */}
       {/*Main Content*/}
       {/*Footer*/}
     </>
