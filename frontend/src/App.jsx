@@ -121,7 +121,7 @@ function App() {
 
 export default App;*/
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserLayout from "./components/layout/UserLayout";
 import Header from './components/common/Header'
@@ -132,13 +132,15 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 
 function App() {
+  const [cartCount, setCartCount] = useState(0)        // ← add
+  const [wishlistCount, setWishlistCount] = useState(0) // ← add
+
   return (
     <BrowserRouter>
-      <Header />
+      <Header cartCount={cartCount} wishlistCount={wishlistCount} /> {/* ← fix */}
       <main className="min-h-screen bg-slate-900">
         <Routes>
-          <Route path="/user" element={<UserLayout />} />{/* User Layout */}
-          {/* Admin Layout route removed (placeholder) */}
+          <Route path="/user" element={<UserLayout />} />
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetails />} />
