@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import Topbar from '../layout/Topbar'
 import { Link, useLocation } from 'react-router-dom'
 import {
@@ -6,6 +6,8 @@ import {
   TbInfoCircle, TbMail, TbSearch, TbHeart,
   TbShoppingCart, TbUser, TbChevronDown, TbX, TbMenu2
 } from 'react-icons/tb'
+import CartDrawer from '../layout/CartDrawer'
+import { CartContext } from '../../context/CartContext'
 
 // ── Design Tokens (Light Theme) ────────────────────────
 const C = {
@@ -132,8 +134,23 @@ const IconBtn = ({ to, label, icon: Icon, count, onClick }) => (
 
 // ── Header ─────────────────────────────────────────────
 const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
-  const [menuOpen,     setMenuOpen] = useState(false)
-  const [showDropdown, setDropdown] = useState(false)
+  const [menuOpen,         setMenuOpen] = useState(false)
+  const [showDropdown,     setDropdown] = useState(false)
+  const [cartDrawerOpen,   setCartDrawerOpen] = useState(false)
+  
+  const { cartItems, updateQuantity, removeFromCart } = useContext(CartContext)
+
+  const handleUpdateQty = (productId, delta) => {
+    const item = cartItems.find(i => i.id === productId)
+    if (item) {
+      const newQty = item.quantity + delta
+      updateQuantity(productId, newQty)
+    }
+  }
+
+  const handleOpenCart = () => {
+    setCartDrawerOpen(true)
+  }
 
   return (
     <>
@@ -231,13 +248,13 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
               count={wishlistCount}
             />
 
-            {/* Cart — onCartClick තිබුනොත් drawer open, නැත්නම් /cart page */}
+            {/* Cart — drawer open */}
             <IconBtn
               to="/cart"
               label="Cart"
               icon={TbShoppingCart}
               count={cartCount}
-              onClick={onCartClick}
+              onClick={handleOpenCart}
             />
 
             {/* Account — සාමාන්‍ය navigate */}
@@ -371,6 +388,21 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
           </div>
         )}
       </header>
+
+      {/* Cart Drawer */}
+      <CartDrawer
+        isOpen={cartDrawerOpen}
+        onClose={() => setCartDrawerOpen(false)}
+        items={cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          qty: item.quantity,
+          emoji: item.emoji || '🪑'
+        }))}
+        onUpdateQty={handleUpdateQty}
+        onRemove={removeFromCart}
+      />
     </>
   )
 }
