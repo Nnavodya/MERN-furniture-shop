@@ -121,69 +121,21 @@ function App() {
 
 export default App;*/
 
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserLayout from "./components/layout/UserLayout";
 import Header from './components/common/Header'
-import CartDrawer from './components/layout/CartDrawer'
 import Home from './pages/Home'
 import Products from './pages/Products'
 import ProductDetails from './pages/ProductDetails'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import { CartProvider } from './context/CartContext'
 
-function App() {
-  const [cartOpen,      setCartOpen]      = useState(false)
-  const [cartItems,     setCartItems]     = useState([])
-  const [wishlistCount, setWishlistCount] = useState(0)
-
-  // Cart item count (qty total)
-  const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
-
-  // Add item to cart
-  const addToCart = (product) => {
-    setCartItems(prev => {
-      const exists = prev.find(i => i.id === product.id)
-      if (exists) {
-        return prev.map(i =>
-          i.id === product.id ? { ...i, qty: i.qty + 1 } : i
-        )
-      }
-      return [...prev, { ...product, qty: 1 }]
-    })
-    setCartOpen(true) // item add වෙද්දී drawer auto open
-  }
-
-  // Update quantity
-  const updateQty = (id, delta) => {
-    setCartItems(prev =>
-      prev.map(i =>
-        i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i
-      )
-    )
-  }
-
-  // Remove item
-  const removeItem = (id) => {
-    setCartItems(prev => prev.filter(i => i.id !== id))
-  }
-
+function AppContent() {
   return (
     <BrowserRouter>
-      <Header
-        cartCount={cartCount}
-        wishlistCount={wishlistCount}
-        onCartClick={() => setCartOpen(true)}
-      />
-
-      <CartDrawer
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        items={cartItems}
-        onUpdateQty={updateQty}
-        onRemove={removeItem}
-      />
-
+      <Header />
       <main className="min-h-screen" style={{ background: '#FAF7F4' }}>
         <Routes>
           <Route path="/user"           element={<UserLayout />}    />
@@ -195,6 +147,14 @@ function App() {
         </Routes>
       </main>
     </BrowserRouter>
+  );
+}
+
+function App() {
+  return (
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
   );
 }
 

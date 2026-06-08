@@ -133,12 +133,13 @@ const IconBtn = ({ to, label, icon: Icon, count, onClick }) => (
 )
 
 // ── Header ─────────────────────────────────────────────
-const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
+const Header = () => {
   const [menuOpen,         setMenuOpen] = useState(false)
   const [showDropdown,     setDropdown] = useState(false)
   const [cartDrawerOpen,   setCartDrawerOpen] = useState(false)
   
-  const { cartItems, updateQuantity, removeFromCart } = useContext(CartContext)
+  const { cartItems, cartCount, updateQuantity, removeFromCart } = useContext(CartContext)
+  const [wishlistCount, setWishlistCount] = useState(0)
 
   const handleUpdateQty = (productId, delta) => {
     const item = cartItems.find(i => i.id === productId)
