@@ -9,36 +9,30 @@ import {
 
 // ── Design Tokens (Light Theme) ────────────────────────
 const C = {
-  // ───── Top Bar ─────
-  topbarBg: '#F5EDE0',
-  topbarText: '#5C3D1E',
-  topbarPromo: '#8B5E2E',
-
-  // ───── Main Navbar ─────
-  navBg: '#FFFFFF',
+  topbarBg:     '#F5EDE0',
+  topbarText:   '#5C3D1E',
+  topbarPromo:  '#8B5E2E',
+  navBg:        '#FFFFFF',
   navSecondary: '#FBF7F2',
-
-  accent: '#8B5E2E',
-  accentMid: 'rgba(139,94,46,0.08)',
+  accent:       '#8B5E2E',
+  accentMid:    'rgba(139,94,46,0.08)',
   accentBorder: 'rgba(139,94,46,0.20)',
-
-  text: '#2C1A0E',
-  textNav: '#3D2410',
-  textMuted: 'rgba(44,26,14,0.55)',
-
-  divider: 'rgba(139,94,46,0.12)',
-  shadow: '0 2px 16px rgba(44,26,14,0.08)',
+  text:         '#2C1A0E',
+  textNav:      '#3D2410',
+  textMuted:    'rgba(44,26,14,0.55)',
+  divider:      'rgba(139,94,46,0.12)',
+  shadow:       '0 2px 16px rgba(44,26,14,0.08)',
 }
 
 const categories = [
-  { label: 'Living Room', path: 'living-room' },
-  { label: 'Bedroom',     path: 'bedroom'     },
-  { label: 'Dining Room', path: 'dining'      },
-  { label: 'Office',      path: 'office'      },
-  { label: 'Outdoor',     path: 'outdoor'     },
-  { label: 'Storage',     path: 'storage'     },
-  { label: 'Lighting',    path: 'lighting'    },
-  { label: 'Decor & Accessories', path: 'decor' },
+  { label: 'Living Room',       path: 'living-room' },
+  { label: 'Bedroom',           path: 'bedroom'     },
+  { label: 'Dining Room',       path: 'dining'      },
+  { label: 'Office',            path: 'office'      },
+  { label: 'Outdoor',           path: 'outdoor'     },
+  { label: 'Storage',           path: 'storage'     },
+  { label: 'Lighting',          path: 'lighting'    },
+  { label: 'Decor & Accessories', path: 'decor'     },
 ]
 
 // ── NavLink ────────────────────────────────────────────
@@ -51,8 +45,8 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
       to={to}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all duration-150"
       style={{
-        color:        active ? C.accent  : C.textNav,
-        opacity:      active ? 1         : 0.75,
+        color:        active ? C.accent    : C.textNav,
+        opacity:      active ? 1           : 0.75,
         background:   active ? C.accentMid : 'transparent',
         borderBottom: active ? `3px solid ${C.accent}` : '3px solid transparent',
         boxShadow:    active ? `0 4px 15px rgba(139,94,46,.10)` : 'none',
@@ -81,10 +75,18 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
 }
 
 // ── Icon Button ────────────────────────────────────────
-const IconBtn = ({ to, label, icon: Icon, count }) => (
+// onClick prop තිබුනොත් → drawer open කරනවා (navigate නොකරයි)
+// onClick prop නැත්නම් → සාමාන්‍ය Link විදිහට navigate කරනවා
+const IconBtn = ({ to, label, icon: Icon, count, onClick }) => (
   <Link
-    to={to}
+    to={onClick ? '#' : to}
     aria-label={label}
+    onClick={e => {
+      if (onClick) {
+        e.preventDefault()
+        onClick()
+      }
+    }}
     className="relative p-2 rounded-lg flex items-center justify-center transition-all duration-150"
     style={{ border: `0.5px solid ${C.accentBorder}`, color: C.textNav, opacity: 0.7 }}
     onMouseEnter={e => {
@@ -104,22 +106,22 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
     {count > 0 && (
       <span
         style={{
-          position: 'absolute',
-          top: '-8px',
-          right: '-8px',
-          background: '#E53935',
-          color: '#FFFFFF',
-          fontSize: '10px',
-          fontWeight: '700',
-          borderRadius: '50%',
-          height: '18px',
-          width: '18px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          lineHeight: 1,
-          boxShadow: '0 0 0 2px #FFFFFF', // light theme — white ring
-          pointerEvents: 'none',
+          position:        'absolute',
+          top:             '-8px',
+          right:           '-8px',
+          background:      '#E53935',
+          color:           '#FFFFFF',
+          fontSize:        '10px',
+          fontWeight:      '700',
+          borderRadius:    '50%',
+          height:          '18px',
+          width:           '18px',
+          display:         'flex',
+          alignItems:      'center',
+          justifyContent:  'center',
+          lineHeight:      1,
+          boxShadow:       '0 0 0 2px #FFFFFF',
+          pointerEvents:   'none',
         }}
       >
         {count > 99 ? '99+' : count}
@@ -129,9 +131,9 @@ const IconBtn = ({ to, label, icon: Icon, count }) => (
 )
 
 // ── Header ─────────────────────────────────────────────
-const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
-  const [menuOpen,     setMenuOpen]  = useState(false)
-  const [showDropdown, setDropdown]  = useState(false)
+const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
+  const [menuOpen,     setMenuOpen] = useState(false)
+  const [showDropdown, setDropdown] = useState(false)
 
   return (
     <>
@@ -139,9 +141,9 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
 
       <header
         style={{
-          background: C.navBg,
-          color: C.text,
-          boxShadow: C.shadow,
+          background:   C.navBg,
+          color:        C.text,
+          boxShadow:    C.shadow,
           borderBottom: `1px solid ${C.divider}`,
         }}
         className="sticky top-0 z-50"
@@ -153,10 +155,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
           <Link to="/" className="flex items-center gap-2 shrink-0 no-underline">
             <TbArmchair
               className="h-8 w-8"
-              style={{
-                color: C.accent,
-                filter: 'drop-shadow(0 0 4px rgba(139,94,46,.25))'
-              }}
+              style={{ color: C.accent, filter: 'drop-shadow(0 0 4px rgba(139,94,46,.25))' }}
             />
             <span className="text-2xl font-bold tracking-wide" style={{ color: C.text }}>
               Furni<span style={{ color: C.accent }}>Hub</span>
@@ -165,7 +164,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            <NavLink to="/" icon={TbHome}>Home</NavLink>
+            <NavLink to="/"        icon={TbHome}>Home</NavLink>
 
             <div
               className="relative"
@@ -178,11 +177,11 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
                   className="absolute top-full left-0 mt-1 w-52 rounded-xl py-2 z-50"
                   style={{
                     background: '#FFFFFF',
-                    border: `0.5px solid ${C.accentBorder}`,
-                    boxShadow: '0 8px 24px rgba(44,26,14,0.10)',
+                    border:     `0.5px solid ${C.accentBorder}`,
+                    boxShadow:  '0 8px 24px rgba(44,26,14,0.10)',
                   }}
                 >
-                  {categories.map((cat) => (
+                  {categories.map(cat => (
                     <Link
                       key={cat.path}
                       to={`/products?category=${cat.path}`}
@@ -224,9 +223,30 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
               />
             </div>
 
-            <IconBtn to="/wishlist" label="Wishlist" icon={TbHeart}        count={wishlistCount} />
-            <IconBtn to="/cart"     label="Cart"     icon={TbShoppingCart} count={cartCount}     />
-            <IconBtn to="/account"  label="Account"  icon={TbUser}         count={0}             />
+            {/* Wishlist — සාමාන්‍ය navigate */}
+            <IconBtn
+              to="/wishlist"
+              label="Wishlist"
+              icon={TbHeart}
+              count={wishlistCount}
+            />
+
+            {/* Cart — onCartClick තිබුනොත් drawer open, නැත්නම් /cart page */}
+            <IconBtn
+              to="/cart"
+              label="Cart"
+              icon={TbShoppingCart}
+              count={cartCount}
+              onClick={onCartClick}
+            />
+
+            {/* Account — සාමාන්‍ය navigate */}
+            <IconBtn
+              to="/account"
+              label="Account"
+              icon={TbUser}
+              count={0}
+            />
 
             <button
               className="lg:hidden p-2 rounded-lg"
@@ -327,7 +347,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0 }) => {
                 Categories
               </p>
               <div className="grid grid-cols-2 gap-1">
-                {categories.map((cat) => (
+                {categories.map(cat => (
                   <Link
                     key={cat.path}
                     to={`/products?category=${cat.path}`}
