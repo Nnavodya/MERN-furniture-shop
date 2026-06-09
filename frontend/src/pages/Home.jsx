@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { TbArrowRight, TbStar, TbTruck, TbShieldCheck, TbRefresh } from 'react-icons/tb'
 import heroImg from '../assets/Hero.jpg'
 import {
   TbArrowRight,
