@@ -72,16 +72,28 @@ const Home = () => (
         <div className="flex flex-col justify-center min-h-[600px] max-w-2xl gap-6 py-20">
 
           {/* Badge */}
-          <span
-            className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full w-fit"
-            style={{
-              background: 'rgba(212,163,115,0.2)',
-              color:      '#F5DEB3',
-              border:     '1px solid rgba(212,163,115,0.4)',
-            }}
-          >
-            New Collection 2025
-          </span>
+          <div className="flex flex-wrap gap-3 items-center">
+  <span
+    className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full w-fit"
+    style={{
+      background: 'rgba(212,163,115,0.2)',
+      color: '#F5DEB3',
+      border: '1px solid rgba(212,163,115,0.4)',
+    }}
+  >
+    New Collection 2025
+  </span>
+
+  <span
+    className="text-xs font-bold px-3 py-1 rounded-full"
+    style={{
+      background: '#D4A373',
+      color: '#2C1A0E',
+    }}
+  >
+    🔥 Up to 30% OFF
+  </span>
+</div>
 
           {/* Headline */}
           <h1
