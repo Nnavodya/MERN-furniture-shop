@@ -353,12 +353,10 @@ const Home = () => (
           </p>
 
           {/* Rating */}
-          <div className="flex items-center gap-1 mt-2">
-            <TbStar
-              className="text-yellow-500"
-            />
-            <span>{product.rating}</span>
-          </div>
+          <div className="flex items-center gap-1 mt-2 transition-all duration-300 hover:scale-110">
+  <TbStar className="text-yellow-500" />
+  <span>{product.rating}</span>
+</div>
 
           {/* Buttons */}
           <div className="flex gap-2 mt-4">
