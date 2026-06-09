@@ -325,11 +325,13 @@ const Home = () => (
   }}
 >
         {/* Image */}
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-60 object-cover"
-        />
+        <div className="overflow-hidden">
+  <img
+    src={product.image}
+    alt={product.name}
+    className="w-full h-60 object-cover transition-transform duration-500 hover:scale-110"
+  />
+</div>
 
         {/* Content */}
         <div className="p-4">
