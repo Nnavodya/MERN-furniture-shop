@@ -324,6 +324,8 @@ const Home = () => (
     border: `1px solid ${C.divider}`,
   }}
 >
+
+  
         {/* Image */}
         <div className="overflow-hidden">
   <img
@@ -385,6 +387,159 @@ const Home = () => (
         </div>
       </div>
     ))}
+  </div>
+</section>
+{/* ── New Arrivals ── */}
+<section className="container mx-auto px-4 py-16">
+  <div className="flex items-center justify-between mb-8">
+    <div>
+      <h2
+        className="text-3xl font-bold"
+        style={{ color: C.text }}
+      >
+        Latest Furniture Collection 2026
+      </h2>
+
+      <p
+        className="text-sm mt-2"
+        style={{ color: C.textMuted }}
+      >
+        Discover our newest arrivals designed for modern living.
+      </p>
+    </div>
+
+    <Link
+      to="/products?filter=new"
+      className="flex items-center gap-2 text-sm font-semibold"
+      style={{ color: C.accent }}
+    >
+      View All
+      <TbArrowRight />
+    </Link>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div
+      className="rounded-2xl overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <img
+        src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200"
+        alt="Bedroom Collection"
+        className="w-full h-72 object-cover"
+      />
+
+      <div className="p-5">
+        <span
+          className="text-xs font-semibold px-3 py-1 rounded-full"
+          style={{
+            background: C.accentLight,
+            color: C.accent,
+          }}
+        >
+          NEW
+        </span>
+
+        <h3
+          className="text-xl font-bold mt-3"
+          style={{ color: C.text }}
+        >
+          Modern Bedroom Collection
+        </h3>
+
+        <p
+          className="text-sm mt-2"
+          style={{ color: C.textMuted }}
+        >
+          Elegant bedroom furniture crafted for comfort and luxury.
+        </p>
+      </div>
+    </div>
+
+    <div
+      className="rounded-2xl overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <img
+        src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200"
+        alt="Living Room Collection"
+        className="w-full h-72 object-cover"
+      />
+
+      <div className="p-5">
+        <span
+          className="text-xs font-semibold px-3 py-1 rounded-full"
+          style={{
+            background: C.accentLight,
+            color: C.accent,
+          }}
+        >
+          TRENDING
+        </span>
+
+        <h3
+          className="text-xl font-bold mt-3"
+          style={{ color: C.text }}
+        >
+          Luxury Living Room Set
+        </h3>
+
+        <p
+          className="text-sm mt-2"
+          style={{ color: C.textMuted }}
+        >
+          Premium sofas and coffee tables for a stylish home.
+        </p>
+      </div>
+    </div>
+
+    <div
+      className="rounded-2xl overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <img
+        src="https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=1200"
+        alt="Dining Collection"
+        className="w-full h-72 object-cover"
+      />
+
+      <div className="p-5">
+        <span
+          className="text-xs font-semibold px-3 py-1 rounded-full"
+          style={{
+            background: C.accentLight,
+            color: C.accent,
+          }}
+        >
+          2026 COLLECTION
+        </span>
+
+        <h3
+          className="text-xl font-bold mt-3"
+          style={{ color: C.text }}
+        >
+          Contemporary Dining Room
+        </h3>
+
+        <p
+          className="text-sm mt-2"
+          style={{ color: C.textMuted }}
+        >
+          Beautiful dining furniture perfect for family gatherings.
+        </p>
+      </div>
+    </div>
+
   </div>
 </section>
 
