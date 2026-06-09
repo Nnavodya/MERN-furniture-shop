@@ -364,14 +364,14 @@ const Home = () => (
           <div className="flex gap-2 mt-4">
 
             <button
-              className="flex-1 py-2 rounded-lg text-sm font-semibold"
-              style={{
-                background: C.accent,
-                color: "#fff",
-              }}
-            >
-              Add to Cart
-            </button>
+  className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:opacity-90 hover:scale-105"
+  style={{
+    background: C.accent,
+    color: "#fff",
+  }}
+>
+  Add to Cart
+</button>
 
             <button
               className="flex-1 py-2 rounded-lg text-sm font-semibold"
