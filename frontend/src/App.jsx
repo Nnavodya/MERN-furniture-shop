@@ -1,5 +1,5 @@
-// v1: Basic routing setup
-import React from 'react';
+// v2: Added cart count state and wishlist state
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserLayout from "./components/layout/UserLayout";
 import Header from './components/common/Header'
@@ -10,9 +10,18 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 
 function App() {
+  const [cartItems,     setCartItems]     = useState([])
+  const [wishlistCount, setWishlistCount] = useState(0)
+
+  // Total cart item count derived from cartItems
+  const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
+
   return (
     <BrowserRouter>
-      <Header />
+      <Header
+        cartCount={cartCount}
+        wishlistCount={wishlistCount}
+      />
       <main className="min-h-screen" style={{ background: '#FAF7F4' }}>
         <Routes>
           <Route path="/user"         element={<UserLayout />}     />
