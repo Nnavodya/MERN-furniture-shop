@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 import Topbar from '../layout/Topbar'
 import { Link, useLocation } from 'react-router-dom'
 import {
@@ -6,8 +6,6 @@ import {
   TbInfoCircle, TbMail, TbSearch, TbHeart,
   TbShoppingCart, TbUser, TbChevronDown, TbX, TbMenu2
 } from 'react-icons/tb'
-import CartDrawer from '../layout/CartDrawer'
-import { CartContext } from '../../context/CartContext'
 
 // ── Design Tokens (Light Theme) ────────────────────────
 const C = {
@@ -27,14 +25,14 @@ const C = {
 }
 
 const categories = [
-  { label: 'Living Room',       path: 'living-room' },
-  { label: 'Bedroom',           path: 'bedroom'     },
-  { label: 'Dining Room',       path: 'dining'      },
-  { label: 'Office',            path: 'office'      },
-  { label: 'Outdoor',           path: 'outdoor'     },
-  { label: 'Storage',           path: 'storage'     },
-  { label: 'Lighting',          path: 'lighting'    },
-  { label: 'Decor & Accessories', path: 'decor'     },
+  { label: 'Living Room',         path: 'living-room' },
+  { label: 'Bedroom',             path: 'bedroom'     },
+  { label: 'Dining Room',         path: 'dining'      },
+  { label: 'Office',              path: 'office'      },
+  { label: 'Outdoor',             path: 'outdoor'     },
+  { label: 'Storage',             path: 'storage'     },
+  { label: 'Lighting',            path: 'lighting'    },
+  { label: 'Decor & Accessories', path: 'decor'       },
 ]
 
 // ── NavLink ────────────────────────────────────────────
@@ -77,8 +75,8 @@ const NavLink = ({ to, icon: Icon, children, dropdown }) => {
 }
 
 // ── Icon Button ────────────────────────────────────────
-// onClick prop තිබුනොත් → drawer open කරනවා (navigate නොකරයි)
-// onClick prop නැත්නම් → සාමාන්‍ය Link විදිහට navigate කරනවා
+// onClick prop තිබුනොත් → drawer open (navigate නොකරයි)
+// onClick prop නැත්නම් → සාමාන්‍ය Link navigate
 const IconBtn = ({ to, label, icon: Icon, count, onClick }) => (
   <Link
     to={onClick ? '#' : to}
@@ -108,22 +106,22 @@ const IconBtn = ({ to, label, icon: Icon, count, onClick }) => (
     {count > 0 && (
       <span
         style={{
-          position:        'absolute',
-          top:             '-8px',
-          right:           '-8px',
-          background:      '#E53935',
-          color:           '#FFFFFF',
-          fontSize:        '10px',
-          fontWeight:      '700',
-          borderRadius:    '50%',
-          height:          '18px',
-          width:           '18px',
-          display:         'flex',
-          alignItems:      'center',
-          justifyContent:  'center',
-          lineHeight:      1,
-          boxShadow:       '0 0 0 2px #FFFFFF',
-          pointerEvents:   'none',
+          position:       'absolute',
+          top:            '-8px',
+          right:          '-8px',
+          background:     '#E53935',
+          color:          '#FFFFFF',
+          fontSize:       '10px',
+          fontWeight:     '700',
+          borderRadius:   '50%',
+          height:         '18px',
+          width:          '18px',
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          lineHeight:     1,
+          boxShadow:      '0 0 0 2px #FFFFFF',
+          pointerEvents:  'none',
         }}
       >
         {count > 99 ? '99+' : count}
@@ -133,25 +131,10 @@ const IconBtn = ({ to, label, icon: Icon, count, onClick }) => (
 )
 
 // ── Header ─────────────────────────────────────────────
-const Header = () => {
-  const [menuOpen,         setMenuOpen] = useState(false)
-  const [showDropdown,     setDropdown] = useState(false)
-  const [cartDrawerOpen,   setCartDrawerOpen] = useState(false)
-  
-  const { cartItems, cartCount, updateQuantity, removeFromCart } = useContext(CartContext)
-  const [wishlistCount, setWishlistCount] = useState(0)
-
-  const handleUpdateQty = (productId, delta) => {
-    const item = cartItems.find(i => i.id === productId)
-    if (item) {
-      const newQty = item.quantity + delta
-      updateQuantity(productId, newQty)
-    }
-  }
-
-  const handleOpenCart = () => {
-    setCartDrawerOpen(true)
-  }
+// CartContext remove කළා — App.jsx props විදිහට pass කරනවා
+const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
+  const [menuOpen,     setMenuOpen] = useState(false)
+  const [showDropdown, setDropdown] = useState(false)
 
   return (
     <>
@@ -182,7 +165,7 @@ const Header = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            <NavLink to="/"        icon={TbHome}>Home</NavLink>
+            <NavLink to="/" icon={TbHome}>Home</NavLink>
 
             <div
               className="relative"
@@ -241,7 +224,6 @@ const Header = () => {
               />
             </div>
 
-            {/* Wishlist — සාමාන්‍ය navigate */}
             <IconBtn
               to="/wishlist"
               label="Wishlist"
@@ -249,16 +231,15 @@ const Header = () => {
               count={wishlistCount}
             />
 
-            {/* Cart — drawer open */}
+            {/* Cart icon — onCartClick drawer open කරනවා */}
             <IconBtn
               to="/cart"
               label="Cart"
               icon={TbShoppingCart}
               count={cartCount}
-              onClick={handleOpenCart}
+              onClick={onCartClick}
             />
 
-            {/* Account — සාමාන්‍ය navigate */}
             <IconBtn
               to="/account"
               label="Account"
@@ -389,21 +370,6 @@ const Header = () => {
           </div>
         )}
       </header>
-
-      {/* Cart Drawer */}
-      <CartDrawer
-        isOpen={cartDrawerOpen}
-        onClose={() => setCartDrawerOpen(false)}
-        items={cartItems.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          qty: item.quantity,
-          emoji: item.emoji || '🪑'
-        }))}
-        onUpdateQty={handleUpdateQty}
-        onRemove={removeFromCart}
-      />
     </>
   )
 }
