@@ -28,6 +28,24 @@ const categories = [
   { label: 'Lighting',    path: 'lighting',    emoji: '💡' },
 ]
 
+const testimonials = [
+  {
+    name: "Sarah M.",
+    review: "The sofa quality exceeded my expectations. Excellent craftsmanship and fast delivery.",
+    rating: 5,
+  },
+  {
+    name: "John D.",
+    review: "Beautiful dining table and outstanding customer service. Highly recommended.",
+    rating: 5,
+  },
+  {
+    name: "Emily R.",
+    review: "The furniture looks exactly like the photos. Premium quality and great value.",
+    rating: 5,
+  },
+];
+
 const C = {
   bg:           '#FAF7F4',
   card:         '#FFFFFF',
