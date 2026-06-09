@@ -1,4 +1,4 @@
-// v4: Added cart functions — addToCart, updateQty, removeItem
+// v5: Added test data for CartDrawer UI testing
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserLayout from "./components/layout/UserLayout";
@@ -12,12 +12,20 @@ import Checkout from './pages/Checkout'
 
 function App() {
   const [cartOpen,      setCartOpen]      = useState(false)
-  const [cartItems,     setCartItems]     = useState([])
   const [wishlistCount, setWishlistCount] = useState(0)
+
+  // ── Test data — backend ready වෙද්දී useState([]) කරන්න ──
+  const [cartItems, setCartItems] = useState([
+    { id: 1, name: 'Linen Sofa',          price: 899,  qty: 1, emoji: '🛋️' },
+    { id: 2, name: 'Oak Dining Table',    price: 1299, qty: 2, emoji: '🪑' },
+    { id: 3, name: 'Velvet Armchair',     price: 549,  qty: 1, emoji: '🪑' },
+    { id: 4, name: 'Marble Coffee Table', price: 699,  qty: 1, emoji: '🪨' },
+    { id: 5, name: 'Pendant Light',       price: 299,  qty: 3, emoji: '💡' },
+    { id: 6, name: 'Woven Rug',           price: 249,  qty: 1, emoji: '🟫' },
+  ])
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
 
-  // Add item to cart — if exists increase qty, else add new
   const addToCart = (product) => {
     setCartItems(prev => {
       const exists = prev.find(i => i.id === product.id)
@@ -31,7 +39,6 @@ function App() {
     setCartOpen(true)
   }
 
-  // Increase or decrease item quantity (min 1)
   const updateQty = (id, delta) => {
     setCartItems(prev =>
       prev.map(i =>
@@ -40,7 +47,6 @@ function App() {
     )
   }
 
-  // Remove item from cart by id
   const removeItem = (id) => {
     setCartItems(prev => prev.filter(i => i.id !== id))
   }
