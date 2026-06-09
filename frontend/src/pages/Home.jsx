@@ -191,6 +191,29 @@ const Home = () => (
       />
     </section>
 
+    {/* ── Special Offer Banner ── */}
+<section
+  className="py-3"
+  style={{
+    background: "linear-gradient(90deg, #8B5E2E, #D4A373)",
+    color: "#FFFFFF",
+  }}
+>
+  <div className="container mx-auto px-4 flex justify-center items-center">
+    <p className="font-semibold text-sm md:text-base">
+      🎉 Summer Sale - Up to 40% Off on Selected Furniture
+    </p>
+
+    <Link
+      to="/products"
+      className="ml-4 underline font-medium"
+      style={{ color: "#FFFFFF" }}
+    >
+      Shop Now
+    </Link>
+  </div>
+</section>
+
     {/* ── Features Bar ── */}
     <section style={{ background: C.accentLight, borderBottom: `1px solid ${C.divider}` }}>
       <div className="container mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -713,6 +736,7 @@ const Home = () => (
         </Link>
       </div>
     </section>
+
 
   </div>
 )
