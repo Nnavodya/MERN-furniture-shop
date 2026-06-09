@@ -4,10 +4,10 @@ import { TbArrowRight, TbStar, TbTruck, TbShieldCheck, TbRefresh } from 'react-i
 import heroImg from '../assets/Hero.jpg'
 
 const features = [
-  { icon: TbTruck,       title: 'Free Delivery',   desc: 'On all orders over $100'      },
-  { icon: TbShieldCheck, title: '2 Year Warranty', desc: 'On every piece of furniture'  },
-  { icon: TbRefresh,     title: 'Easy Returns',    desc: '30-day hassle-free returns'   },
-  { icon: TbStar,        title: 'Premium Quality', desc: 'Handpicked by our experts'    },
+  { icon: TbTruck,       title: 'Free Delivery',   desc: 'On all orders over $100'     },
+  { icon: TbShieldCheck, title: '2 Year Warranty', desc: 'On every piece of furniture' },
+  { icon: TbRefresh,     title: 'Easy Returns',    desc: '30-day hassle-free returns'  },
+  { icon: TbStar,        title: 'Premium Quality', desc: 'Handpicked by our experts'   },
 ]
 
 const categories = [
@@ -33,127 +33,117 @@ const C = {
 const Home = () => (
   <div style={{ background: C.bg, minHeight: '100vh', color: C.text }}>
 
-    {/* ── Hero — Option 2: Left text + Right image ── */}
-    <section style={{ background: '#FFFFFF', borderBottom: `1px solid ${C.divider}`, overflow: 'hidden' }}>
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row items-center min-h-[520px] gap-0">
+    {/* ── Hero — Full Background Image ── */}
+    <section
+      style={{
+        position:           'relative',
+        minHeight:          '600px',
+        backgroundImage:    `url(${heroImg})`,
+        backgroundSize:     'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat:   'no-repeat',
+        overflow:           'hidden',
+      }}
+    >
+      {/* Dark overlay — text readable වෙන්න */}
+      <div
+        style={{
+          position:   'absolute',
+          inset:      0,
+          background: 'linear-gradient(to right, rgba(20,10,5,0.75) 0%, rgba(20,10,5,0.45) 60%, rgba(20,10,5,0.15) 100%)',
+        }}
+      />
 
-          {/* Left — Text content */}
-          <div className="flex-1 flex flex-col gap-6 py-16 lg:py-20 lg:pr-12 items-start text-left">
+      {/* Content */}
+      <div
+        className="container mx-auto px-4"
+        style={{ position: 'relative', zIndex: 1 }}
+      >
+        <div className="flex flex-col justify-center min-h-[600px] max-w-2xl gap-6 py-20">
 
-            {/* Badge */}
-            <span
-              className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full"
-              style={{ background: C.accentLight, color: C.accent, border: `1px solid ${C.accentBorder}` }}
+          {/* Badge */}
+          <span
+            className="text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full w-fit"
+            style={{
+              background: 'rgba(212,163,115,0.2)',
+              color:      '#F5DEB3',
+              border:     '1px solid rgba(212,163,115,0.4)',
+            }}
+          >
+            New Collection 2025
+          </span>
+
+          {/* Headline */}
+          <h1
+            className="text-5xl md:text-6xl font-bold leading-tight"
+            style={{ color: '#FFFFFF' }}
+          >
+            Furniture That<br />Feels{' '}
+            <span style={{ color: '#D4A373' }}>Like Home</span>
+          </h1>
+
+          {/* Subtext */}
+          <p className="text-lg max-w-md" style={{ color: 'rgba(255,255,255,0.75)' }}>
+            Thoughtfully designed pieces for every room. Quality craftsmanship, delivered to your door.
+          </p>
+
+          {/* Buttons */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              to="/products"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
+              style={{ background: '#D4A373', color: '#2C1A0E' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#C49060'}
+              onMouseLeave={e => e.currentTarget.style.background = '#D4A373'}
             >
-              New Collection 2025
-            </span>
-
-            {/* Headline */}
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
-              style={{ color: C.text }}
+              Shop Now <TbArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/products?filter=new"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
+              style={{
+                background: 'transparent',
+                color:      '#FFFFFF',
+                border:     '1.5px solid rgba(255,255,255,0.5)',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              Furniture That<br />Feels{' '}
-              <span style={{ color: C.accent }}>Like Home</span>
-            </h1>
-
-            {/* Subtext */}
-            <p className="text-lg max-w-md" style={{ color: C.textMuted }}>
-              Thoughtfully designed pieces for every room. Quality craftsmanship, delivered to your door.
-            </p>
-
-            {/* Buttons */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <Link
-                to="/products"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
-                style={{ background: C.accent, color: '#FFFFFF' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#7A5229'}
-                onMouseLeave={e => e.currentTarget.style.background = C.accent}
-              >
-                Shop Now <TbArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/products?filter=new"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
-                style={{ background: 'transparent', color: C.accent, border: `1.5px solid ${C.accentBorder}` }}
-                onMouseEnter={e => e.currentTarget.style.background = C.accentLight}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                New Arrivals
-              </Link>
-            </div>
-
-            {/* Stats row */}
-            <div className="flex items-center gap-6 pt-2">
-              {[
-                { value: '500+', label: 'Products'      },
-                { value: '10k+', label: 'Happy Customers'},
-                { value: '4.9★', label: 'Rating'        },
-              ].map(({ value, label }) => (
-                <div key={label}>
-                  <p className="text-xl font-bold" style={{ color: C.text }}>{value}</p>
-                  <p className="text-xs" style={{ color: C.textMuted }}>{label}</p>
-                </div>
-              ))}
-            </div>
+              New Arrivals
+            </Link>
           </div>
 
-          {/* Right — Hero image */}
+          {/* Stats row */}
           <div
-            className="w-full lg:w-[520px] shrink-0 relative"
-            style={{ height: '520px' }}
+            className="flex items-center gap-6 pt-4 mt-2"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}
           >
-            {/* Decorative background shape */}
-            <div
-              className="absolute inset-0 lg:inset-y-0 lg:right-0"
-              style={{
-                background: C.accentLight,
-                borderRadius: '0 0 0 80px',
-              }}
-            />
-
-            {/* Hero image */}
-            <img
-              src={heroImg}
-              alt="Beautiful furniture collection"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{
-                borderRadius: '0 0 0 80px',
-                mixBlendMode: 'multiply',   // ← transparent effect — background color blends through
-              }}
-            />
-
-            {/* Floating badge — top left of image */}
-            <div
-              className="absolute top-8 left-4 lg:-left-6 px-4 py-2 rounded-xl shadow-sm"
-              style={{
-                background: '#FFFFFF',
-                border: `1px solid ${C.accentBorder}`,
-                zIndex: 10,
-              }}
-            >
-              <p className="text-xs font-semibold" style={{ color: C.accent }}>✨ New Arrivals</p>
-              <p className="text-xs" style={{ color: C.textMuted }}>Spring 2025</p>
-            </div>
-
-            {/* Floating badge — bottom right of image */}
-            <div
-              className="absolute bottom-10 right-4 px-4 py-2 rounded-xl shadow-sm"
-              style={{
-                background: '#FFFFFF',
-                border: `1px solid ${C.accentBorder}`,
-                zIndex: 10,
-              }}
-            >
-              <p className="text-xs font-semibold" style={{ color: C.text }}>🚚 Free Delivery</p>
-              <p className="text-xs" style={{ color: C.textMuted }}>On orders over $100</p>
-            </div>
+            {[
+              { value: '500+', label: 'Products'       },
+              { value: '10k+', label: 'Happy Customers' },
+              { value: '4.9★', label: 'Rating'          },
+            ].map(({ value, label }) => (
+              <div key={label}>
+                <p className="text-xl font-bold" style={{ color: '#D4A373' }}>{value}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>{label}</p>
+              </div>
+            ))}
           </div>
 
         </div>
       </div>
+
+      {/* Bottom fade into page bg */}
+      <div
+        style={{
+          position:   'absolute',
+          bottom:     0,
+          left:       0,
+          right:      0,
+          height:     '80px',
+          background: `linear-gradient(to bottom, transparent, ${C.bg})`,
+        }}
+      />
     </section>
 
     {/* ── Features Bar ── */}
