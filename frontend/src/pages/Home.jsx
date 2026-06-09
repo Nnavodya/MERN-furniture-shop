@@ -318,7 +318,7 @@ const Home = () => (
     ].map((product) => (
       <div
   key={product.id}
-  className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl"
+  className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-[#8B5E2E]"
   style={{
     background: C.card,
     border: `1px solid ${C.divider}`,
