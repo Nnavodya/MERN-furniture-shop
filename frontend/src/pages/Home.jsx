@@ -1,5 +1,3 @@
-
-
 import React from 'react'
 import { Link } from 'react-router-dom'
 import heroImg from '../assets/Hero.jpg'
@@ -319,13 +317,13 @@ const Home = () => (
       },
     ].map((product) => (
       <div
-        key={product.id}
-        className="rounded-2xl overflow-hidden transition-all duration-300"
-        style={{
-          background: C.card,
-          border: `1px solid ${C.divider}`,
-        }}
-      >
+  key={product.id}
+  className="rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl"
+  style={{
+    background: C.card,
+    border: `1px solid ${C.divider}`,
+  }}
+>
         {/* Image */}
         <img
           src={product.image}
