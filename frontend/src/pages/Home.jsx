@@ -103,10 +103,15 @@ const Home = () => (
             <span style={{ color: '#D4A373' }}>Like Home</span>
           </h1>
 
-          {/* Subtext */}
-          <p className="text-lg max-w-md" style={{ color: 'rgba(255,255,255,0.75)' }}>
-            Thoughtfully designed pieces for every room. Quality craftsmanship, delivered to your door.
-          </p>
+                  {/* Subtext */}
+<p
+  className="text-lg max-w-lg"
+  style={{ color: 'rgba(255,255,255,0.78)' }}
+>
+  Discover premium furniture collections crafted for modern living.
+  Transform your home with elegant sofas, dining sets, bedroom furniture,
+  and décor designed for comfort and style.
+</p>
 
           {/* Buttons */}
           <div className="flex items-center gap-3 flex-wrap">
@@ -248,6 +253,142 @@ const Home = () => (
         ))}
       </div>
     </section>
+
+    {/* ── Best Selling Products ── */}
+<section className="container mx-auto px-4 py-16">
+  <div className="flex items-center justify-between mb-8">
+    <div>
+      <h2
+        className="text-3xl font-bold"
+        style={{ color: C.text }}
+      >
+        Best Selling Products
+      </h2>
+      <p
+        className="text-sm mt-2"
+        style={{ color: C.textMuted }}
+      >
+        Most loved furniture pieces by our customers
+      </p>
+    </div>
+
+    <Link
+      to="/products"
+      className="flex items-center gap-2 text-sm font-semibold"
+      style={{ color: C.accent }}
+    >
+      View All
+      <TbArrowRight />
+    </Link>
+  </div>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
+    {[
+      {
+        id: 1,
+        name: "Modern Sofa",
+        price: "$799",
+        rating: "4.9",
+        image:
+          "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800",
+      },
+      {
+        id: 2,
+        name: "Wood Dining Table",
+        price: "$599",
+        rating: "4.8",
+        image:
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800",
+      },
+      {
+        id: 3,
+        name: "Luxury Bed",
+        price: "$999",
+        rating: "4.9",
+        image:
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800",
+      },
+      {
+        id: 4,
+        name: "Office Chair",
+        price: "$299",
+        rating: "4.7",
+        image:
+          "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=800",
+      },
+    ].map((product) => (
+      <div
+        key={product.id}
+        className="rounded-2xl overflow-hidden transition-all duration-300"
+        style={{
+          background: C.card,
+          border: `1px solid ${C.divider}`,
+        }}
+      >
+        {/* Image */}
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-60 object-cover"
+        />
+
+        {/* Content */}
+        <div className="p-4">
+
+          {/* Name */}
+          <h3
+            className="font-semibold text-lg"
+            style={{ color: C.text }}
+          >
+            {product.name}
+          </h3>
+
+          {/* Price */}
+          <p
+            className="font-bold text-xl mt-2"
+            style={{ color: C.accent }}
+          >
+            {product.price}
+          </p>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1 mt-2">
+            <TbStar
+              className="text-yellow-500"
+            />
+            <span>{product.rating}</span>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2 mt-4">
+
+            <button
+              className="flex-1 py-2 rounded-lg text-sm font-semibold"
+              style={{
+                background: C.accent,
+                color: "#fff",
+              }}
+            >
+              Add to Cart
+            </button>
+
+            <button
+              className="flex-1 py-2 rounded-lg text-sm font-semibold"
+              style={{
+                border: `1px solid ${C.accent}`,
+                color: C.accent,
+              }}
+            >
+              Quick View
+            </button>
+
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
 
     {/* ── CTA Banner ── */}
     <section className="container mx-auto px-4 pb-16">
