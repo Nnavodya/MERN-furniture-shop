@@ -1,4 +1,3 @@
-// v5: Added test data for CartDrawer UI testing
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import UserLayout from "./components/layout/UserLayout";
