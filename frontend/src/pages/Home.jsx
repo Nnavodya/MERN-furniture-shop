@@ -110,29 +110,48 @@ const Home = () => (
 
           {/* Buttons */}
           <div className="flex items-center gap-3 flex-wrap">
-            <Link
-              to="/products"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
-              style={{ background: '#D4A373', color: '#2C1A0E' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#C49060'}
-              onMouseLeave={e => e.currentTarget.style.background = '#D4A373'}
-            >
-              Shop Now <TbArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/products?filter=new"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
-              style={{
-                background: 'transparent',
-                color:      '#FFFFFF',
-                border:     '1.5px solid rgba(255,255,255,0.5)',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              New Arrivals
-            </Link>
-          </div>
+
+  {/* Shop Now */}
+  <Link
+    to="/products"
+    className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
+    style={{
+      background: '#D4A373',
+      color: '#2C1A0E',
+    }}
+  >
+    Shop Now
+    <TbArrowRight className="h-4 w-4" />
+  </Link>
+
+  {/* Explore Collection */}
+  <Link
+    to="/products"
+    className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
+    style={{
+      background: '#FFFFFF',
+      color: '#2C1A0E',
+    }}
+  >
+    Explore Collection
+    <TbArrowRight className="h-4 w-4" />
+  </Link>
+
+  {/* Watch Room Tour */}
+  <button
+    className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150"
+    style={{
+      background: 'rgba(255,255,255,0.12)',
+      color: '#FFFFFF',
+      border: '1px solid rgba(255,255,255,0.3)',
+      backdropFilter: 'blur(10px)',
+    }}
+  >
+    <TbPlayerPlay className="h-4 w-4" />
+    Watch Room Tour
+  </button>
+
+</div>
 
           {/* Stats row */}
           <div
