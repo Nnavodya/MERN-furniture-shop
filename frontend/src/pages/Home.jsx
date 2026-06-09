@@ -7,7 +7,9 @@ import {
   TbTruck,
   TbShieldCheck,
   TbRefresh,
-  TbPlayerPlay
+  TbPlayerPlay,
+  TbLock,
+  TbHeadset
 } from 'react-icons/tb'
 
 const features = [
