@@ -4,6 +4,14 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbArrowRight, TbStar, TbTruck, TbShieldCheck, TbRefresh } from 'react-icons/tb'
 import heroImg from '../assets/Hero.jpg'
+import {
+  TbArrowRight,
+  TbStar,
+  TbTruck,
+  TbShieldCheck,
+  TbRefresh,
+  TbPlayerPlay
+} from 'react-icons/tb'
 
 const features = [
   { icon: TbTruck,       title: 'Free Delivery',   desc: 'On all orders over $100'     },
