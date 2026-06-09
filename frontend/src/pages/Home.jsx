@@ -545,6 +545,151 @@ const Home = () => (
   </div>
 </section>
 
+          {/* ── Why Choose Us ── */}
+<section
+  className="container mx-auto px-4 py-16"
+>
+  <div className="text-center mb-12">
+    <h2
+      className="text-3xl font-bold"
+      style={{ color: C.text }}
+    >
+      Why Choose Us
+    </h2>
+
+    <p
+      className="mt-3 text-sm"
+      style={{ color: C.textMuted }}
+    >
+      We are committed to delivering premium furniture and an exceptional shopping experience.
+    </p>
+  </div>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+
+    {/* Free Delivery */}
+    <div
+      className="text-center p-6 rounded-2xl hover:-translate-y-2 transition-all duration-300 hover:shadow-xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <TbTruck
+        className="mx-auto mb-4"
+        size={42}
+        style={{ color: C.accent }}
+      />
+      <h3 className="font-semibold mb-2">
+        Free Delivery
+      </h3>
+      <p
+        className="text-sm"
+        style={{ color: C.textMuted }}
+      >
+        Fast and reliable delivery on selected orders.
+      </p>
+    </div>
+
+    {/* Secure Payments */}
+    <div
+      className="text-center p-6 rounded-2xl hover:-translate-y-2 transition-all duration-300 hover:shadow-xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <TbLock
+        className="mx-auto mb-4"
+        size={42}
+        style={{ color: C.accent }}
+      />
+      <h3 className="font-semibold mb-2">
+        Secure Payments
+      </h3>
+      <p
+        className="text-sm"
+        style={{ color: C.textMuted }}
+      >
+        Safe checkout with trusted payment methods.
+      </p>
+    </div>
+
+    {/* Premium Quality */}
+    <div
+      className="text-center p-6 rounded-2xl hover:-translate-y-2 transition-all duration-300 hover:shadow-xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <TbStar
+        className="mx-auto mb-4"
+        size={42}
+        style={{ color: C.accent }}
+      />
+      <h3 className="font-semibold mb-2">
+        Premium Quality
+      </h3>
+      <p
+        className="text-sm"
+        style={{ color: C.textMuted }}
+      >
+        Carefully selected furniture crafted to last.
+      </p>
+    </div>
+
+    {/* Easy Returns */}
+    <div
+      className="text-center p-6 rounded-2xl hover:-translate-y-2 transition-all duration-300 hover:shadow-xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <TbRefresh
+        className="mx-auto mb-4"
+        size={42}
+        style={{ color: C.accent }}
+      />
+      <h3 className="font-semibold mb-2">
+        Easy Returns
+      </h3>
+      <p
+        className="text-sm"
+        style={{ color: C.textMuted }}
+      >
+        Hassle-free returns within 30 days.
+      </p>
+    </div>
+
+    {/* 24/7 Support */}
+    <div
+      className="text-center p-6 rounded-2xl hover:-translate-y-2 transition-all duration-300 hover:shadow-xl"
+      style={{
+        background: C.card,
+        border: `1px solid ${C.divider}`,
+      }}
+    >
+      <TbHeadset
+        className="mx-auto mb-4"
+        size={42}
+        style={{ color: C.accent }}
+      />
+      <h3 className="font-semibold mb-2">
+        24/7 Support
+      </h3>
+      <p
+        className="text-sm"
+        style={{ color: C.textMuted }}
+      >
+        Our team is always ready to help you.
+      </p>
+    </div>
+
+  </div>
+</section>
+
     {/* ── CTA Banner ── */}
     <section className="container mx-auto px-4 pb-16">
       <div
