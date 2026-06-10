@@ -10,6 +10,7 @@ import WhyChooseUs from '../components/home/WhyChooseUs'
 import CustomerReviews from '../components/home/CustomerReviews'
 import CTABanner from '../components/home/CTABanner'
 import { colors } from '../components/home/constants'
+import Footer from '../components/layout/Footer';
 
 const C = colors
 
