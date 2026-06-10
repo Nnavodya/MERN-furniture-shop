@@ -1,16 +1,16 @@
 // v2: Modular Home Page with Separated Components
 import React from 'react'
-import HeroSection from '../components/home/HeroSection'
-import SpecialOfferBanner from '../components/home/SpecialOfferBanner'
-import FeaturesBar from '../components/home/FeaturesBar'
-import CategorySection from '../components/home/CategorySection'
+import HeroSection         from '../components/home/HeroSection'
+import SpecialOfferBanner  from '../components/home/SpecialOfferBanner'
+import FeaturesBar         from '../components/home/FeaturesBar'
+import CategorySection     from '../components/home/CategorySection'
 import BestSellingProducts from '../components/home/BestSellingProducts'
-import NewArrivals from '../components/home/NewArrivals'
-import WhyChooseUs from '../components/home/WhyChooseUs'
-import CustomerReviews from '../components/home/CustomerReviews'
-import CTABanner from '../components/home/CTABanner'
-import { colors } from '../components/home/constants'
-import Footer from '../components/layout/Footer';
+import NewArrivals         from '../components/home/NewArrivals'
+import WhyChooseUs         from '../components/home/WhyChooseUs'
+import CustomerReviews     from '../components/home/CustomerReviews'
+import CTABanner           from '../components/home/CTABanner'
+import { colors }          from '../components/home/constants'
+
 
 const C = colors
 
@@ -25,7 +25,6 @@ const Home = () => (
     <WhyChooseUs />
     <CustomerReviews />
     <CTABanner />
-    <Footer />
   </div>
 )
 
