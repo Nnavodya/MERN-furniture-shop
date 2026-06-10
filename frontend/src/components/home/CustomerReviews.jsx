@@ -1,4 +1,4 @@
-// v1: Customer Reviews Component
+// src/components/home/CustomerReviews.jsx
 import React from 'react'
 import { TbStar } from 'react-icons/tb'
 import { testimonials, colors } from './constants'
@@ -12,7 +12,6 @@ const CustomerReviews = () => {
         <h2 className="text-3xl font-bold" style={{ color: C.text }}>
           What Our Customers Say
         </h2>
-
         <p className="mt-3 text-sm" style={{ color: C.textMuted }}>
           Trusted by thousands of happy customers.
         </p>
@@ -33,18 +32,13 @@ const CustomerReviews = () => {
                 <TbStar
                   key={i}
                   size={20}
-                  style={{
-                    color: "#F4B400",
-                    fill: "#F4B400",
-                  }}
+                  style={{ color: '#F4B400', fill: '#F4B400' }}
                 />
               ))}
             </div>
-
             <p className="italic mb-4" style={{ color: C.textMuted }}>
               "{item.review}"
             </p>
-
             <h4 className="font-semibold" style={{ color: C.text }}>
               — {item.name}
             </h4>
@@ -55,4 +49,4 @@ const CustomerReviews = () => {
   )
 }
 
-export default CustomerReviews
+export default CustomerReviews;

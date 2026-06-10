@@ -1,4 +1,4 @@
-// v1: CTA Banner Component
+// src/components/home/CTABanner.jsx
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbArrowRight } from 'react-icons/tb'
@@ -33,4 +33,4 @@ const CTABanner = () => {
   )
 }
 
-export default CTABanner
+export default CTABanner;
