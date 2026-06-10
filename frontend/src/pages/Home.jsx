@@ -25,6 +25,7 @@ const Home = () => (
     <WhyChooseUs />
     <CustomerReviews />
     <CTABanner />
+    <Footer />
   </div>
 )
 

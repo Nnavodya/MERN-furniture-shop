@@ -197,7 +197,7 @@ const Footer = () => {
               <div className="flex">
                 <input
                   type="email"
-                  placeholder="Your email"
+                  placeholder="nethmirajapaksha038@gmail.com"
                   className="flex-1 px-4 py-3 rounded-l-lg outline-none text-black"
                 />
 
