@@ -1,6 +1,6 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import Footer from '../layout/Footer';
+import Footer from './Footer'
 
 const UserLayout = () => {
   return (
@@ -9,8 +9,8 @@ const UserLayout = () => {
       <main className="min-h-screen" style={{ background: '#FAF7F4' }}>
         <Outlet />
       </main>
-
-      {/* Footer */}
+        
+      {/* Global Footer */} 
       <Footer />
     </>
   )
