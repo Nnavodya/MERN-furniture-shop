@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { TbSearch, TbFilter, TbHeart, TbShoppingCart, TbStar } from 'react-icons/tb'
+import { useCart } from '../context/CartContext'
 
 const C = {
   bg:           '#FAF7F4',
@@ -26,41 +27,62 @@ const categories = [
 ]
 
 const sortOptions = [
-  { label: 'Featured',      value: 'featured'   },
-  { label: 'Price: Low–High', value: 'price-asc' },
-  { label: 'Price: High–Low', value: 'price-desc'},
-  { label: 'Newest',        value: 'newest'     },
+  { label: 'Featured',        value: 'featured'   },
+  { label: 'Price: Low–High', value: 'price-asc'  },
+  { label: 'Price: High–Low', value: 'price-desc' },
+  { label: 'Newest',          value: 'newest'     },
 ]
 
-// Placeholder products
-const products = Array.from({ length: 12 }, (_, i) => ({
-  id:       i + 1,
-  name:     ['Linen Sofa', 'Oak Dining Table', 'Velvet Armchair', 'Walnut Bookshelf',
-             'Rattan Bed Frame', 'Marble Coffee Table', 'Pendant Light', 'Accent Mirror',
-             'Outdoor Lounger', 'Filing Cabinet', 'Bedside Table', 'Woven Rug'][i],
-  category: ['living-room','dining','living-room','storage',
-             'bedroom','living-room','lighting','decor',
-             'outdoor','office','bedroom','decor'][i],
-  price:    [899, 1299, 549, 749, 1099, 699, 299, 449, 799, 399, 349, 249][i],
-  rating:   [4.8, 4.6, 4.9, 4.5, 4.7, 4.4, 4.8, 4.3, 4.6, 4.2, 4.7, 4.5][i],
-  reviews:  [128, 84, 203, 67, 91, 145, 176, 52, 38, 29, 88, 114][i],
-  badge:    ['','New','Bestseller','','Sale','New','','','','','Bestseller','Sale'][i],
-}))
+// ── Placeholder products — backend ready වෙද්දී GET /api/products වලින් fetch කරන්න ──
+const products = [
+  { id: 1,  name: 'Linen Sofa',          category: 'living-room', price: 899,  rating: 4.8, reviews: 128, badge: '',           emoji: '🛋️' },
+  { id: 2,  name: 'Oak Dining Table',    category: 'dining',      price: 1299, rating: 4.6, reviews: 84,  badge: 'New',        emoji: '🪑' },
+  { id: 3,  name: 'Velvet Armchair',     category: 'living-room', price: 549,  rating: 4.9, reviews: 203, badge: 'Bestseller', emoji: '🪑' },
+  { id: 4,  name: 'Walnut Bookshelf',    category: 'storage',     price: 749,  rating: 4.5, reviews: 67,  badge: '',           emoji: '📚' },
+  { id: 5,  name: 'Rattan Bed Frame',    category: 'bedroom',     price: 1099, rating: 4.7, reviews: 91,  badge: 'Sale',       emoji: '🛏️' },
+  { id: 6,  name: 'Marble Coffee Table', category: 'living-room', price: 699,  rating: 4.4, reviews: 145, badge: 'New',        emoji: '🪨' },
+  { id: 7,  name: 'Pendant Light',       category: 'lighting',    price: 299,  rating: 4.8, reviews: 176, badge: '',           emoji: '💡' },
+  { id: 8,  name: 'Accent Mirror',       category: 'decor',       price: 449,  rating: 4.3, reviews: 52,  badge: '',           emoji: '🪞' },
+  { id: 9,  name: 'Outdoor Lounger',     category: 'outdoor',     price: 799,  rating: 4.6, reviews: 38,  badge: '',           emoji: '🏖️' },
+  { id: 10, name: 'Filing Cabinet',      category: 'office',      price: 399,  rating: 4.2, reviews: 29,  badge: '',           emoji: '🗄️' },
+  { id: 11, name: 'Bedside Table',       category: 'bedroom',     price: 349,  rating: 4.7, reviews: 88,  badge: 'Bestseller', emoji: '🪑' },
+  { id: 12, name: 'Woven Rug',           category: 'decor',       price: 249,  rating: 4.5, reviews: 114, badge: 'Sale',       emoji: '🟫' },
+]
 
 const Products = () => {
   const [searchParams] = useSearchParams()
   const activeCat = searchParams.get('category') || ''
-  const [sort, setSort]       = useState('featured')
-  const [search, setSearch]   = useState('')
+  const [sort, setSort]         = useState('featured')
+  const [search, setSearch]     = useState('')
   const [wishlist, setWishlist] = useState([])
 
-  const filtered = products.filter(p =>
-    (activeCat === '' || p.category === activeCat) &&
-    (search === '' || p.name.toLowerCase().includes(search.toLowerCase()))
-  )
+  // ── Real cart — shared with Header badge, CartDrawer, Cart page ──
+  const { addToCart } = useCart()
+
+  const filtered = products
+    .filter(p =>
+      (activeCat === '' || p.category === activeCat) &&
+      (search === '' || p.name.toLowerCase().includes(search.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (sort === 'price-asc')  return a.price - b.price
+      if (sort === 'price-desc') return b.price - a.price
+      if (sort === 'newest')     return b.id - a.id
+      return 0 // featured = original order
+    })
 
   const toggleWishlist = (id) =>
     setWishlist(w => w.includes(id) ? w.filter(x => x !== id) : [...w, id])
+
+  const handleAddToCart = (product) => {
+    addToCart({
+      id:    product.id,
+      name:  product.name,
+      price: product.price,
+      emoji: product.emoji,
+      category: categories.find(c => c.path === product.category)?.label || '',
+    })
+  }
 
   return (
     <div style={{ background: C.bg, minHeight: '100vh' }}>
@@ -144,7 +166,7 @@ const Products = () => {
             {filtered.map(product => (
               <div
                 key={product.id}
-                className="rounded-xl overflow-hidden transition-all duration-200"
+                className="relative rounded-xl overflow-hidden transition-all duration-200"
                 style={{
                   background: C.card,
                   border: `1px solid ${C.divider}`,
@@ -153,43 +175,46 @@ const Products = () => {
                 onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
               >
                 {/* Image placeholder */}
-                <div
-                  className="relative w-full"
-                  style={{ paddingBottom: '75%', background: C.accentLight }}
-                >
+                <Link to={`/products/${product.id}`}>
                   <div
-                    className="absolute inset-0 flex items-center justify-center text-4xl"
-                    style={{ color: 'rgba(139,94,46,0.2)' }}
+                    className="relative w-full"
+                    style={{ paddingBottom: '75%', background: C.accentLight }}
                   >
-                    🪑
-                  </div>
-
-                  {/* Badge */}
-                  {product.badge && (
-                    <span
-                      className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: product.badge === 'Sale' ? '#E53935' : C.accent,
-                        color: '#FFFFFF',
-                      }}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center text-4xl"
+                      style={{ color: 'rgba(139,94,46,0.2)' }}
                     >
-                      {product.badge}
-                    </span>
-                  )}
+                      {product.emoji}
+                    </div>
 
-                  {/* Wishlist */}
-                  <button
-                    onClick={() => toggleWishlist(product.id)}
-                    className="absolute top-2 right-2 p-1.5 rounded-full transition-all"
-                    style={{
-                      background: '#FFFFFF',
-                      border: `1px solid ${C.accentBorder}`,
-                      color: wishlist.includes(product.id) ? '#E53935' : C.textMuted,
-                    }}
-                  >
-                    <TbHeart className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+                    {/* Badge */}
+                    {product.badge && (
+                      <span
+                        className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{
+                          background: product.badge === 'Sale' ? '#E53935' : C.accent,
+                          color: '#FFFFFF',
+                        }}
+                      >
+                        {product.badge}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+
+                {/* Wishlist */}
+                <button
+                  onClick={() => toggleWishlist(product.id)}
+                  className="absolute p-1.5 rounded-full transition-all"
+                  style={{
+                    top: '8px', right: '8px',
+                    background: '#FFFFFF',
+                    border: `1px solid ${C.accentBorder}`,
+                    color: wishlist.includes(product.id) ? '#E53935' : C.textMuted,
+                  }}
+                >
+                  <TbHeart className="h-3.5 w-3.5" />
+                </button>
 
                 {/* Info */}
                 <div className="p-3">
@@ -221,6 +246,7 @@ const Products = () => {
                       ${product.price.toLocaleString()}
                     </span>
                     <button
+                      onClick={() => handleAddToCart(product)}
                       className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all"
                       style={{
                         background: C.accentLight,
