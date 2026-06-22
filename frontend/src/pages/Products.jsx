@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { TbSearch, TbFilter, TbHeart, TbShoppingCart, TbStar } from 'react-icons/tb'
+import { TbSearch, TbHeart, TbShoppingCart, TbStar } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
+import { products, categories, sortOptions } from '../data/products'
 
 const C = {
   bg:           '#FAF7F4',
@@ -13,41 +14,6 @@ const C = {
   textMuted:    'rgba(44,26,14,0.55)',
   divider:      'rgba(139,94,46,0.12)',
 }
-
-const categories = [
-  { label: 'All',              path: ''            },
-  { label: 'Living Room',      path: 'living-room' },
-  { label: 'Bedroom',          path: 'bedroom'     },
-  { label: 'Dining Room',      path: 'dining'      },
-  { label: 'Office',           path: 'office'      },
-  { label: 'Outdoor',          path: 'outdoor'     },
-  { label: 'Storage',          path: 'storage'     },
-  { label: 'Lighting',         path: 'lighting'    },
-  { label: 'Decor',            path: 'decor'       },
-]
-
-const sortOptions = [
-  { label: 'Featured',        value: 'featured'   },
-  { label: 'Price: Low–High', value: 'price-asc'  },
-  { label: 'Price: High–Low', value: 'price-desc' },
-  { label: 'Newest',          value: 'newest'     },
-]
-
-// ── Placeholder products — backend ready වෙද්දී GET /api/products වලින් fetch කරන්න ──
-const products = [
-  { id: 1,  name: 'Linen Sofa',          category: 'living-room', price: 899,  rating: 4.8, reviews: 128, badge: '',           emoji: '🛋️' },
-  { id: 2,  name: 'Oak Dining Table',    category: 'dining',      price: 1299, rating: 4.6, reviews: 84,  badge: 'New',        emoji: '🪑' },
-  { id: 3,  name: 'Velvet Armchair',     category: 'living-room', price: 549,  rating: 4.9, reviews: 203, badge: 'Bestseller', emoji: '🪑' },
-  { id: 4,  name: 'Walnut Bookshelf',    category: 'storage',     price: 749,  rating: 4.5, reviews: 67,  badge: '',           emoji: '📚' },
-  { id: 5,  name: 'Rattan Bed Frame',    category: 'bedroom',     price: 1099, rating: 4.7, reviews: 91,  badge: 'Sale',       emoji: '🛏️' },
-  { id: 6,  name: 'Marble Coffee Table', category: 'living-room', price: 699,  rating: 4.4, reviews: 145, badge: 'New',        emoji: '🪨' },
-  { id: 7,  name: 'Pendant Light',       category: 'lighting',    price: 299,  rating: 4.8, reviews: 176, badge: '',           emoji: '💡' },
-  { id: 8,  name: 'Accent Mirror',       category: 'decor',       price: 449,  rating: 4.3, reviews: 52,  badge: '',           emoji: '🪞' },
-  { id: 9,  name: 'Outdoor Lounger',     category: 'outdoor',     price: 799,  rating: 4.6, reviews: 38,  badge: '',           emoji: '🏖️' },
-  { id: 10, name: 'Filing Cabinet',      category: 'office',      price: 399,  rating: 4.2, reviews: 29,  badge: '',           emoji: '🗄️' },
-  { id: 11, name: 'Bedside Table',       category: 'bedroom',     price: 349,  rating: 4.7, reviews: 88,  badge: 'Bestseller', emoji: '🪑' },
-  { id: 12, name: 'Woven Rug',           category: 'decor',       price: 249,  rating: 4.5, reviews: 114, badge: 'Sale',       emoji: '🟫' },
-]
 
 const Products = () => {
   const [searchParams] = useSearchParams()
