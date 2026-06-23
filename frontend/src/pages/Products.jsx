@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { TbSearch, TbHeart, TbShoppingCart, TbStar } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 import { products, categories, sortOptions } from '../data/products'
 
 const C = {
@@ -18,12 +19,12 @@ const C = {
 const Products = () => {
   const [searchParams] = useSearchParams()
   const activeCat = searchParams.get('category') || ''
-  const [sort, setSort]         = useState('featured')
-  const [search, setSearch]     = useState('')
-  const [wishlist, setWishlist] = useState([])
+  const [sort, setSort]     = useState('featured')
+  const [search, setSearch] = useState('')
 
-  // ── Real cart — shared with Header badge, CartDrawer, Cart page ──
+  // ── Real cart & wishlist — shared across Header badge, CartDrawer, Wishlist page ──
   const { addToCart } = useCart()
+  const { isWishlisted, toggleWishlist } = useWishlist()
 
   const filtered = products
     .filter(p =>
@@ -37,9 +38,6 @@ const Products = () => {
       return 0 // featured = original order
     })
 
-  const toggleWishlist = (id) =>
-    setWishlist(w => w.includes(id) ? w.filter(x => x !== id) : [...w, id])
-
   const handleAddToCart = (product) => {
     addToCart({
       id:    product.id,
@@ -47,6 +45,13 @@ const Products = () => {
       price: product.price,
       emoji: product.emoji,
       category: categories.find(c => c.path === product.category)?.label || '',
+    })
+  }
+
+  const handleToggleWishlist = (product) => {
+    toggleWishlist({
+      id: product.id, name: product.name, price: product.price,
+      emoji: product.emoji, rating: product.rating, reviews: product.reviews,
     })
   }
 
@@ -170,16 +175,17 @@ const Products = () => {
 
                 {/* Wishlist */}
                 <button
-                  onClick={() => toggleWishlist(product.id)}
+                  onClick={() => handleToggleWishlist(product)}
                   className="absolute p-1.5 rounded-full transition-all"
                   style={{
                     top: '8px', right: '8px',
                     background: '#FFFFFF',
                     border: `1px solid ${C.accentBorder}`,
-                    color: wishlist.includes(product.id) ? '#E53935' : C.textMuted,
+                    color: isWishlisted(product.id) ? '#E53935' : C.textMuted,
                   }}
+                  aria-label="Toggle wishlist"
                 >
-                  <TbHeart className="h-3.5 w-3.5" />
+                  <TbHeart className="h-3.5 w-3.5" style={{ fill: isWishlisted(product.id) ? '#E53935' : 'none' }} />
                 </button>
 
                 {/* Info */}
