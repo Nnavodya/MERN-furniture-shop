@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
+import { WishlistProvider, useWishlist } from './context/WishlistContext'
 import UserLayout     from "./components/layout/UserLayout";
 import Header         from './components/common/Header'
 import CartDrawer     from './components/layout/CartDrawer'
@@ -16,12 +17,13 @@ import Contact        from './pages/Contact'
 import Login          from './pages/Login'
 import Signup         from './pages/Signup'
 import Account        from './pages/Account'
+import Wishlist       from './pages/Wishlist'
 
 function AppShell() {
-  const [cartOpen,      setCartOpen]      = useState(false)
-  const [wishlistCount, setWishlistCount] = useState(0)
+  const [cartOpen, setCartOpen] = useState(false)
 
   const { cartItems, cartCount, updateQty, removeFromCart } = useCart()
+  const { wishlistCount } = useWishlist()
 
   return (
     <BrowserRouter>
@@ -52,6 +54,7 @@ function AppShell() {
           <Route path="/login"        element={<Login />}          />
           <Route path="/signup"       element={<Signup />}         />
           <Route path="/account"      element={<Account />}        />
+          <Route path="/wishlist"     element={<Wishlist />}       />
         </Route>
       </Routes>
 
@@ -63,7 +66,9 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <AppShell />
+        <WishlistProvider>
+          <AppShell />
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   )
