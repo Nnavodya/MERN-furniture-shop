@@ -5,6 +5,7 @@ import {
   TbTruck, TbShieldCheck, TbRefresh, TbChevronRight,
 } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 import { getProductById, getRelatedProducts, categories } from '../data/products'
 
 const C = {
@@ -22,12 +23,12 @@ const ProductDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { addToCart } = useCart()
+  const { isWishlisted, toggleWishlist } = useWishlist()
 
   const product = getProductById(id)
 
   const [qty, setQty]               = useState(1)
   const [selectedColor, setColor]   = useState(0)
-  const [wishlisted, setWishlisted] = useState(false)
   const [justAdded, setJustAdded]   = useState(false)
   const [tab, setTab]               = useState('description')
 
@@ -56,6 +57,7 @@ const ProductDetails = () => {
 
   const related   = getRelatedProducts(product)
   const categoryLabel = categories.find(c => c.path === product.category)?.label || ''
+  const wishlisted = isWishlisted(product.id)
 
   const handleAddToCart = () => {
     addToCart({
@@ -72,6 +74,17 @@ const ProductDetails = () => {
   const handleBuyNow = () => {
     handleAddToCart()
     navigate('/cart')
+  }
+
+  const handleToggleWishlist = () => {
+    toggleWishlist({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      emoji: product.emoji,
+      rating: product.rating,
+      reviews: product.reviews,
+    })
   }
 
   return (
@@ -262,14 +275,16 @@ const ProductDetails = () => {
                 {justAdded ? 'Added to Cart ✓' : 'Add to Cart'}
               </button>
 
+              {/* ── Wishlist — now wired to WishlistContext, same as Products/Sale ── */}
               <button
-                onClick={() => setWishlisted(w => !w)}
+                onClick={handleToggleWishlist}
                 className="p-3 rounded-xl transition-all shrink-0"
                 style={{
                   border: `1px solid ${C.accentBorder}`,
                   color: wishlisted ? '#E53935' : C.textMuted,
                   background: wishlisted ? 'rgba(229,57,53,0.06)' : 'transparent',
                 }}
+                aria-label="Toggle wishlist"
               >
                 <TbHeart className="h-5 w-5" style={{ fill: wishlisted ? '#E53935' : 'none' }} />
               </button>
