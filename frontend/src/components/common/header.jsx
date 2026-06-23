@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Topbar from '../layout/Topbar'
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import {
   TbArmchair, TbLayoutGrid, TbHome, TbTag,
   TbInfoCircle, TbMail, TbSearch, TbHeart,
@@ -130,11 +131,44 @@ const IconBtn = ({ to, label, icon: Icon, count, onClick }) => (
   </Link>
 )
 
+// ── Account Button — login state aware ──────────────────
+// Logged in  → avatar initial, links to /account
+// Logged out → user icon, links to /login
+const AccountBtn = () => {
+  const { user, isAuthenticated } = useAuth()
+
+  if (isAuthenticated) {
+    return (
+      <Link
+        to="/account"
+        aria-label="Account"
+        className="relative flex items-center justify-center rounded-full transition-all duration-150 shrink-0"
+        style={{
+          width: '36px', height: '36px',
+          background: C.accentMid,
+          border: `1.5px solid ${C.accent}`,
+          color: C.accent,
+          fontSize: '13px',
+          fontWeight: 700,
+        }}
+        title={user.name}
+      >
+        {user.name.charAt(0).toUpperCase()}
+      </Link>
+    )
+  }
+
+  return (
+    <IconBtn to="/login" label="Login" icon={TbUser} count={0} />
+  )
+}
+
 // ── Header ─────────────────────────────────────────────
 // CartContext remove කළා — App.jsx props විදිහට pass කරනවා
 const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
   const [menuOpen,     setMenuOpen] = useState(false)
   const [showDropdown, setDropdown] = useState(false)
+  const { isAuthenticated, user, logout } = useAuth()
 
   return (
     <>
@@ -240,12 +274,8 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
               onClick={onCartClick}
             />
 
-            <IconBtn
-              to="/account"
-              label="Account"
-              icon={TbUser}
-              count={0}
-            />
+            {/* Account — login state aware */}
+            <AccountBtn />
 
             <button
               className="lg:hidden p-2 rounded-lg"
@@ -340,6 +370,38 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
                 <Icon className="h-4 w-4" /> {label}
               </Link>
             ))}
+
+            {/* Mobile — Account / Login + Logout */}
+            <div className="pt-3" style={{ borderTop: `1px solid ${C.divider}` }}>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/account"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm"
+                    style={{ color: C.textNav, opacity: 0.75 }}
+                  >
+                    <TbUser className="h-4 w-4" /> {user.name}
+                  </Link>
+                  <button
+                    onClick={() => { logout(); setMenuOpen(false) }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm w-full text-left"
+                    style={{ color: '#E53935' }}
+                  >
+                    <TbX className="h-4 w-4" /> Log Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm"
+                  style={{ color: C.accent, fontWeight: 600 }}
+                >
+                  <TbUser className="h-4 w-4" /> Log In / Sign Up
+                </Link>
+              )}
+            </div>
 
             <div className="pt-3" style={{ borderTop: `1px solid ${C.divider}` }}>
               <p className="text-xs px-3 mb-2" style={{ color: C.accent, opacity: 0.8 }}>
