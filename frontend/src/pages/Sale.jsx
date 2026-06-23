@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbHeart, TbShoppingCart, TbStar, TbFlame } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 import { products, categories } from '../data/products'
 
 const C = {
@@ -17,18 +18,22 @@ const C = {
 
 const Sale = () => {
   const { addToCart } = useCart()
-  const [wishlist, setWishlist] = useState([])
+  const { isWishlisted, toggleWishlist } = useWishlist()
 
   // ── Products on sale — has an oldPrice in the shared data set ──
   const saleProducts = products.filter(p => p.oldPrice)
-
-  const toggleWishlist = (id) =>
-    setWishlist(w => w.includes(id) ? w.filter(x => x !== id) : [...w, id])
 
   const handleAddToCart = (product) => {
     addToCart({
       id: product.id, name: product.name, price: product.price, emoji: product.emoji,
       category: categories.find(c => c.path === product.category)?.label || '',
+    })
+  }
+
+  const handleToggleWishlist = (product) => {
+    toggleWishlist({
+      id: product.id, name: product.name, price: product.price,
+      emoji: product.emoji, rating: product.rating, reviews: product.reviews,
     })
   }
 
@@ -100,15 +105,16 @@ const Sale = () => {
                   </Link>
 
                   <button
-                    onClick={() => toggleWishlist(product.id)}
+                    onClick={() => handleToggleWishlist(product)}
                     className="absolute p-1.5 rounded-full transition-all"
                     style={{
                       top: '8px', right: '8px', background: '#FFFFFF',
                       border: `1px solid ${C.accentBorder}`,
-                      color: wishlist.includes(product.id) ? '#E53935' : C.textMuted,
+                      color: isWishlisted(product.id) ? '#E53935' : C.textMuted,
                     }}
+                    aria-label="Toggle wishlist"
                   >
-                    <TbHeart className="h-3.5 w-3.5" />
+                    <TbHeart className="h-3.5 w-3.5" style={{ fill: isWishlisted(product.id) ? '#E53935' : 'none' }} />
                   </button>
 
                   <div className="p-3">
