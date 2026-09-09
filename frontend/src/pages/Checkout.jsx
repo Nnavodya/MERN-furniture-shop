@@ -5,6 +5,8 @@ import {
   TbLock, TbMapPin, TbArrowRight, TbCircleCheck,
 } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
+import api from '../api/axios'
 
 const C = {
   bg:           '#FAF7F4',
@@ -155,6 +157,7 @@ const OrderSummary = ({ cartItems, shippingCost, buttonLabel, onButtonClick, but
 // ── Main Checkout component ─────────────────────────────
 const Checkout = () => {
   const { cartItems, clearCart } = useCart()
+  const { user } = useAuth()
   const navigate = useNavigate()
 
   const [step, setStep] = useState('shipping')
@@ -230,15 +233,31 @@ const Checkout = () => {
   const shippingValid = shipping.fullName && shipping.email && shipping.address && shipping.city && shipping.postalCode
   const paymentValid  = payment.method === 'cod' || (payment.cardNumber && payment.expiry && payment.cvc && payment.nameOnCard)
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     setPlacing(true)
-    // ── Simulated order submission — replace with POST /api/orders once backend is ready ──
-    setTimeout(() => {
-      setOrderNumber(Math.floor(100000 + Math.random() * 900000).toString())
-      setPlacing(false)
+    try {
+      const { data } = await api.post('/orders', {
+        items: cartItems.map(i => ({
+          product:  i.id,
+          name:     i.name,
+          price:    i.price,
+          qty:      i.qty,
+          emoji:    i.emoji || '🪑',
+        })),
+        shippingAddress: shipping,
+        paymentMethod:   payment.method,
+        subtotal,
+        shippingCost,
+        total: subtotal + shippingCost,
+      })
+      setOrderNumber(data._id.toString().slice(-6).toUpperCase())
       setPlaced(true)
       clearCart()
-    }, 1200)
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to place order. Please try again.')
+    } finally {
+      setPlacing(false)
+    }
   }
 
   return (
