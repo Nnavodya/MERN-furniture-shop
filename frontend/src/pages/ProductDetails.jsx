@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   TbStar, TbHeart, TbMinus, TbPlus, TbShoppingCart,
@@ -6,7 +6,7 @@ import {
 } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { getProductById, getRelatedProducts, categories } from '../data/products'
+import api from '../api/axios'
 
 const C = {
   bg:           '#FAF7F4',
@@ -19,27 +19,69 @@ const C = {
   divider:      'rgba(139,94,46,0.12)',
 }
 
+const categoryLabels = {
+  'living-room': 'Living Room',
+  'bedroom':     'Bedroom',
+  'dining':      'Dining Room',
+  'office':      'Office',
+  'outdoor':     'Outdoor',
+  'storage':     'Storage',
+  'lighting':    'Lighting',
+  'decor':       'Decor',
+}
+
 const ProductDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { addToCart } = useCart()
   const { isWishlisted, toggleWishlist } = useWishlist()
 
-  const product = getProductById(id)
+  const [product, setProduct]   = useState(null)
+  const [related, setRelated]   = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
+  const [qty, setQty]           = useState(1)
+  const [selectedColor, setColor] = useState(0)
+  const [justAdded, setJustAdded] = useState(false)
+  const [tab, setTab]           = useState('description')
 
-  const [qty, setQty]               = useState(1)
-  const [selectedColor, setColor]   = useState(0)
-  const [justAdded, setJustAdded]   = useState(false)
-  const [tab, setTab]               = useState('description')
+  // ── Fetch product by ID ──
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        setError('')
+        const { data } = await api.get(`/products/${id}`)
+        setProduct(data)
 
-  // ── Product not found ──
-  if (!product) {
+        // ── Fetch related products (same category, exclude current) ──
+        const { data: all } = await api.get('/products', { params: { category: data.category } })
+        setRelated(all.filter(p => p._id !== data._id).slice(0, 4))
+      } catch (err) {
+        setError('Product not found.')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProduct()
+  }, [id])
+
+  if (loading) {
     return (
       <div style={{ background: C.bg, minHeight: '100vh' }}>
         <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-2xl font-bold mb-2" style={{ color: C.text }}>
-            Product not found
-          </p>
+          <p className="text-sm" style={{ color: C.textMuted }}>Loading product…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !product) {
+    return (
+      <div style={{ background: C.bg, minHeight: '100vh' }}>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <p className="text-2xl font-bold mb-2" style={{ color: C.text }}>Product not found</p>
           <p className="text-sm mb-6" style={{ color: C.textMuted }}>
             The product you're looking for doesn't exist or may have been removed.
           </p>
@@ -55,16 +97,15 @@ const ProductDetails = () => {
     )
   }
 
-  const related   = getRelatedProducts(product)
-  const categoryLabel = categories.find(c => c.path === product.category)?.label || ''
-  const wishlisted = isWishlisted(product.id)
+  const categoryLabel = categoryLabels[product.category] || product.category
+  const wishlisted    = isWishlisted(product._id)
 
   const handleAddToCart = () => {
     addToCart({
-      id:    product.id,
-      name:  product.name,
-      price: product.price,
-      emoji: product.emoji,
+      id:       product._id,
+      name:     product.name,
+      price:    product.price,
+      emoji:    product.emoji,
       category: categoryLabel,
     }, qty)
     setJustAdded(true)
@@ -78,11 +119,11 @@ const ProductDetails = () => {
 
   const handleToggleWishlist = () => {
     toggleWishlist({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      emoji: product.emoji,
-      rating: product.rating,
+      id:      product._id,
+      name:    product.name,
+      price:   product.price,
+      emoji:   product.emoji,
+      rating:  product.rating,
       reviews: product.reviews,
     })
   }
@@ -106,7 +147,7 @@ const ProductDetails = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
 
-          {/* ── LEFT: Image gallery ── */}
+          {/* ── LEFT: Image ── */}
           <div>
             <div
               className="relative rounded-2xl flex items-center justify-center"
@@ -115,7 +156,6 @@ const ProductDetails = () => {
               <span style={{ fontSize: '7rem', color: 'rgba(139,94,46,0.25)' }}>
                 {product.emoji}
               </span>
-
               {product.badge && (
                 <span
                   className="absolute top-4 left-4 text-xs font-bold px-3 py-1 rounded-full"
@@ -127,7 +167,6 @@ const ProductDetails = () => {
                   {product.badge}
                 </span>
               )}
-
               {!product.inStock && (
                 <div
                   className="absolute inset-0 flex items-center justify-center rounded-2xl"
@@ -140,12 +179,11 @@ const ProductDetails = () => {
               )}
             </div>
 
-            {/* Thumbnail row — placeholder variations of same emoji */}
             <div className="flex gap-3 mt-4">
               {[0, 1, 2, 3].map(i => (
                 <div
                   key={i}
-                  className="flex items-center justify-center rounded-xl text-2xl cursor-pointer transition-all"
+                  className="flex items-center justify-center rounded-xl text-2xl cursor-pointer"
                   style={{
                     width: '70px', height: '70px',
                     background: C.accentLight,
@@ -158,7 +196,7 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* ── RIGHT: Info panel ── */}
+          {/* ── RIGHT: Info ── */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: C.accent }}>
               {categoryLabel}
@@ -168,7 +206,6 @@ const ProductDetails = () => {
               {product.name}
             </h1>
 
-            {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map(i => (
@@ -186,23 +223,22 @@ const ProductDetails = () => {
               <span className="text-sm" style={{ color: C.textMuted }}>({product.reviews} reviews)</span>
             </div>
 
-            {/* Price */}
             <div className="flex items-center gap-3 mb-6">
               <span className="text-3xl font-bold" style={{ color: C.accent }}>
                 ${product.price.toLocaleString()}
               </span>
               {product.oldPrice && (
-                <span className="text-lg line-through" style={{ color: C.textMuted }}>
-                  ${product.oldPrice.toLocaleString()}
-                </span>
-              )}
-              {product.oldPrice && (
-                <span
-                  className="text-xs font-bold px-2 py-1 rounded-full"
-                  style={{ background: 'rgba(229,57,53,0.1)', color: '#E53935' }}
-                >
-                  Save ${(product.oldPrice - product.price).toLocaleString()}
-                </span>
+                <>
+                  <span className="text-lg line-through" style={{ color: C.textMuted }}>
+                    ${product.oldPrice.toLocaleString()}
+                  </span>
+                  <span
+                    className="text-xs font-bold px-2 py-1 rounded-full"
+                    style={{ background: 'rgba(229,57,53,0.1)', color: '#E53935' }}
+                  >
+                    Save ${(product.oldPrice - product.price).toLocaleString()}
+                  </span>
+                </>
               )}
             </div>
 
@@ -210,12 +246,9 @@ const ProductDetails = () => {
               {product.description}
             </p>
 
-            {/* Color swatches */}
             {product.colors?.length > 0 && (
               <div className="mb-6">
-                <p className="text-xs font-semibold mb-2" style={{ color: C.text }}>
-                  Color
-                </p>
+                <p className="text-xs font-semibold mb-2" style={{ color: C.text }}>Color</p>
                 <div className="flex gap-2">
                   {product.colors.map((c, i) => (
                     <button
@@ -226,34 +259,23 @@ const ProductDetails = () => {
                         width: '32px', height: '32px',
                         background: c,
                         border: selectedColor === i ? `2.5px solid ${C.accent}` : `2px solid ${C.divider}`,
-                        outline: selectedColor === i ? `2px solid ${C.accentLight}` : 'none',
                       }}
-                      aria-label={`Color option ${i + 1}`}
                     />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Qty + Add to cart */}
             <div className="flex items-center gap-3 mb-4">
               <div
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
                 style={{ border: `1px solid ${C.accentBorder}` }}
               >
-                <button
-                  onClick={() => setQty(q => Math.max(1, q - 1))}
-                  style={{ color: C.accent }}
-                >
+                <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ color: C.accent }}>
                   <TbMinus className="h-4 w-4" />
                 </button>
-                <span className="text-sm font-bold w-6 text-center" style={{ color: C.text }}>
-                  {qty}
-                </span>
-                <button
-                  onClick={() => setQty(q => q + 1)}
-                  style={{ color: C.accent }}
-                >
+                <span className="text-sm font-bold w-6 text-center" style={{ color: C.text }}>{qty}</span>
+                <button onClick={() => setQty(q => q + 1)} style={{ color: C.accent }}>
                   <TbPlus className="h-4 w-4" />
                 </button>
               </div>
@@ -266,7 +288,6 @@ const ProductDetails = () => {
                   background: product.inStock ? C.accent : C.divider,
                   color: '#FFFFFF',
                   cursor: product.inStock ? 'pointer' : 'not-allowed',
-                  opacity: product.inStock ? 1 : 0.6,
                 }}
                 onMouseEnter={e => { if (product.inStock) e.currentTarget.style.background = '#7A5229' }}
                 onMouseLeave={e => { if (product.inStock) e.currentTarget.style.background = C.accent }}
@@ -275,7 +296,6 @@ const ProductDetails = () => {
                 {justAdded ? 'Added to Cart ✓' : 'Add to Cart'}
               </button>
 
-              {/* ── Wishlist — now wired to WishlistContext, same as Products/Sale ── */}
               <button
                 onClick={handleToggleWishlist}
                 className="p-3 rounded-xl transition-all shrink-0"
@@ -284,7 +304,6 @@ const ProductDetails = () => {
                   color: wishlisted ? '#E53935' : C.textMuted,
                   background: wishlisted ? 'rgba(229,57,53,0.06)' : 'transparent',
                 }}
-                aria-label="Toggle wishlist"
               >
                 <TbHeart className="h-5 w-5" style={{ fill: wishlisted ? '#E53935' : 'none' }} />
               </button>
@@ -302,7 +321,6 @@ const ProductDetails = () => {
               </button>
             )}
 
-            {/* Trust badges */}
             <div className="grid grid-cols-3 gap-3 pt-5" style={{ borderTop: `1px solid ${C.divider}` }}>
               {[
                 { icon: TbTruck,       label: 'Free Delivery'  },
@@ -316,18 +334,16 @@ const ProductDetails = () => {
               ))}
             </div>
 
-            <p className="text-xs mt-5" style={{ color: C.textMuted }}>
-              SKU: {product.sku}
-            </p>
+            <p className="text-xs mt-5" style={{ color: C.textMuted }}>SKU: {product.sku}</p>
           </div>
         </div>
 
-        {/* ── Tabs: Description / Reviews ── */}
+        {/* ── Tabs ── */}
         <div className="mb-12">
           <div className="flex gap-6 mb-5" style={{ borderBottom: `1px solid ${C.divider}` }}>
             {[
               { key: 'description', label: 'Description' },
-              { key: 'reviews',      label: `Reviews (${product.reviews})` },
+              { key: 'reviews',     label: `Reviews (${product.reviews})` },
             ].map(t => (
               <button
                 key={t.key}
@@ -345,24 +361,19 @@ const ProductDetails = () => {
 
           {tab === 'description' ? (
             <p className="text-sm leading-relaxed max-w-2xl" style={{ color: C.textMuted }}>
-              {product.description} Crafted with attention to detail, this piece is designed
-              to be both a functional addition and a visual anchor in your space. Each unit is
-              quality-checked before shipping, and arrives with simple assembly instructions
-              where needed.
+              {product.description}
             </p>
           ) : (
             <div className="flex flex-col gap-4 max-w-2xl">
               {[
-                { name: 'Priya K.', rating: 5, text: 'Exactly as described — sturdy, well-finished, and arrived faster than expected.' },
+                { name: 'Priya K.',   rating: 5, text: 'Exactly as described — sturdy, well-finished, and arrived faster than expected.' },
                 { name: 'Daniel R.', rating: 4, text: 'Great quality for the price. Assembly took about 20 minutes.' },
               ].map((r, i) => (
                 <div key={i} className="p-4 rounded-xl" style={{ background: C.card, border: `1px solid ${C.divider}` }}>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="flex">
-                      {[1, 2, 3, 4, 5].map(s => (
-                        <TbStar
-                          key={s}
-                          className="h-3.5 w-3.5"
+                      {[1,2,3,4,5].map(s => (
+                        <TbStar key={s} className="h-3.5 w-3.5"
                           style={{ color: s <= r.rating ? '#F59E0B' : C.divider, fill: s <= r.rating ? '#F59E0B' : 'transparent' }}
                         />
                       ))}
@@ -379,30 +390,24 @@ const ProductDetails = () => {
         {/* ── Related Products ── */}
         {related.length > 0 && (
           <div>
-            <h2 className="text-xl font-bold mb-5" style={{ color: C.text }}>
-              You may also like
-            </h2>
+            <h2 className="text-xl font-bold mb-5" style={{ color: C.text }}>You may also like</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {related.map(p => (
                 <Link
-                  key={p.id}
-                  to={`/products/${p.id}`}
+                  key={p._id}
+                  to={`/products/${p._id}`}
                   className="rounded-xl overflow-hidden transition-all"
                   style={{ background: C.card, border: `1px solid ${C.divider}` }}
                   onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 24px rgba(44,26,14,0.10)'}
                   onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
                 >
-                  <div
-                    className="flex items-center justify-center text-3xl"
-                    style={{ aspectRatio: '4/3', background: C.accentLight }}
-                  >
+                  <div className="flex items-center justify-center text-3xl"
+                    style={{ aspectRatio: '4/3', background: C.accentLight }}>
                     {p.emoji}
                   </div>
                   <div className="p-3">
                     <p className="text-sm font-semibold mb-1" style={{ color: C.text }}>{p.name}</p>
-                    <p className="text-sm font-bold" style={{ color: C.accent }}>
-                      ${p.price.toLocaleString()}
-                    </p>
+                    <p className="text-sm font-bold" style={{ color: C.accent }}>${p.price.toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
