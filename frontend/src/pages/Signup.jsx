@@ -26,22 +26,21 @@ const Signup = () => {
   const passwordsMatch = form.password && form.password === form.confirm
   const valid = form.name && form.email && form.password.length >= 6 && passwordsMatch
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!valid) return
     setError('')
     setSubmitting(true)
 
-    // ── Simulated delay — replace with real API call once backend is ready ──
-    setTimeout(() => {
-      const result = signup(form)
-      setSubmitting(false)
-      if (result.success) {
-        navigate('/', { replace: true })
-      } else {
-        setError(result.error)
-      }
-    }, 500)
+    // ── Real API call — POST /api/auth/signup ──
+    const result = await signup(form)
+    setSubmitting(false)
+
+    if (result.success) {
+      navigate('/', { replace: true })
+    } else {
+      setError(result.error)
+    }
   }
 
   return (
