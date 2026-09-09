@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { TbSearch, TbHeart, TbShoppingCart, TbStar } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { products, categories, sortOptions } from '../data/products'
+import api from '../api/axios'
 
 const C = {
   bg:           '#FAF7F4',
@@ -16,31 +16,68 @@ const C = {
   divider:      'rgba(139,94,46,0.12)',
 }
 
+const categories = [
+  { label: 'All',              path: ''            },
+  { label: 'Living Room',      path: 'living-room' },
+  { label: 'Bedroom',          path: 'bedroom'     },
+  { label: 'Dining Room',      path: 'dining'      },
+  { label: 'Office',           path: 'office'      },
+  { label: 'Outdoor',          path: 'outdoor'     },
+  { label: 'Storage',          path: 'storage'     },
+  { label: 'Lighting',         path: 'lighting'    },
+  { label: 'Decor',            path: 'decor'       },
+]
+
+const sortOptions = [
+  { label: 'Featured',        value: 'featured'   },
+  { label: 'Price: Low–High', value: 'price-asc'  },
+  { label: 'Price: High–Low', value: 'price-desc' },
+  { label: 'Newest',          value: 'newest'     },
+]
+
 const Products = () => {
   const [searchParams] = useSearchParams()
   const activeCat = searchParams.get('category') || ''
-  const [sort, setSort]     = useState('featured')
-  const [search, setSearch] = useState('')
+  const [sort, setSort]         = useState('featured')
+  const [search, setSearch]     = useState('')
+  const [products, setProducts] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
 
-  // ── Real cart & wishlist — shared across Header badge, CartDrawer, Wishlist page ──
   const { addToCart } = useCart()
   const { isWishlisted, toggleWishlist } = useWishlist()
 
-  const filtered = products
-    .filter(p =>
-      (activeCat === '' || p.category === activeCat) &&
-      (search === '' || p.name.toLowerCase().includes(search.toLowerCase()))
-    )
-    .sort((a, b) => {
-      if (sort === 'price-asc')  return a.price - b.price
-      if (sort === 'price-desc') return b.price - a.price
-      if (sort === 'newest')     return b.id - a.id
-      return 0 // featured = original order
-    })
+  // ── Fetch products from real API ──
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true)
+        setError('')
+        const params = {}
+        if (activeCat) params.category = activeCat
+        if (search)    params.search   = search
+        const { data } = await api.get('/products', { params })
+        setProducts(data)
+      } catch (err) {
+        setError('Failed to load products. Please try again.')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [activeCat, search])
+
+  const sorted = [...products].sort((a, b) => {
+    if (sort === 'price-asc')  return a.price - b.price
+    if (sort === 'price-desc') return b.price - a.price
+    if (sort === 'newest')     return new Date(b.createdAt) - new Date(a.createdAt)
+    return 0
+  })
 
   const handleAddToCart = (product) => {
     addToCart({
-      id:    product.id,
+      id:    product._id,
       name:  product.name,
       price: product.price,
       emoji: product.emoji,
@@ -50,8 +87,12 @@ const Products = () => {
 
   const handleToggleWishlist = (product) => {
     toggleWishlist({
-      id: product.id, name: product.name, price: product.price,
-      emoji: product.emoji, rating: product.rating, reviews: product.reviews,
+      id:      product._id,
+      name:    product.name,
+      price:   product.price,
+      emoji:   product.emoji,
+      rating:  product.rating,
+      reviews: product.reviews,
     })
   }
 
@@ -65,14 +106,12 @@ const Products = () => {
             {activeCat ? categories.find(c => c.path === activeCat)?.label : 'All Products'}
           </h1>
           <p className="text-sm" style={{ color: C.textMuted }}>
-            {filtered.length} products found
+            {loading ? 'Loading…' : `${sorted.length} products found`}
           </p>
         </div>
 
         {/* ── Filters Row ── */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
-
-          {/* Search */}
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-lg flex-1 min-w-[200px]"
             style={{ background: C.card, border: `1px solid ${C.accentBorder}` }}
@@ -88,16 +127,11 @@ const Products = () => {
             />
           </div>
 
-          {/* Sort */}
           <select
             value={sort}
             onChange={e => setSort(e.target.value)}
             className="px-3 py-2 rounded-lg text-sm outline-none cursor-pointer"
-            style={{
-              background: C.card,
-              border: `1px solid ${C.accentBorder}`,
-              color: C.text,
-            }}
+            style={{ background: C.card, border: `1px solid ${C.accentBorder}`, color: C.text }}
           >
             {sortOptions.map(o => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -115,9 +149,9 @@ const Products = () => {
                 to={cat.path ? `/products?category=${cat.path}` : '/products'}
                 className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150"
                 style={{
-                  background:  active ? C.accent       : C.card,
-                  color:       active ? '#FFFFFF'      : C.textMuted,
-                  border:      `1px solid ${active ? C.accent : C.accentBorder}`,
+                  background: active ? C.accent : C.card,
+                  color:      active ? '#FFFFFF' : C.textMuted,
+                  border:     `1px solid ${active ? C.accent : C.accentBorder}`,
                 }}
               >
                 {cat.label}
@@ -126,27 +160,38 @@ const Products = () => {
           })}
         </div>
 
+        {/* ── States ── */}
+        {loading && (
+          <div className="text-center py-20" style={{ color: C.textMuted }}>
+            <p className="text-sm">Loading products…</p>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="text-center py-20" style={{ color: '#E53935' }}>
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
         {/* ── Product Grid ── */}
-        {filtered.length === 0 ? (
+        {!loading && !error && sorted.length === 0 && (
           <div className="text-center py-20" style={{ color: C.textMuted }}>
             <p className="text-lg font-medium">No products found</p>
             <p className="text-sm mt-1">Try a different search or category</p>
           </div>
-        ) : (
+        )}
+
+        {!loading && !error && sorted.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filtered.map(product => (
+            {sorted.map(product => (
               <div
-                key={product.id}
+                key={product._id}
                 className="relative rounded-xl overflow-hidden transition-all duration-200"
-                style={{
-                  background: C.card,
-                  border: `1px solid ${C.divider}`,
-                }}
+                style={{ background: C.card, border: `1px solid ${C.divider}` }}
                 onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 24px rgba(44,26,14,0.10)'}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
               >
-                {/* Image placeholder */}
-                <Link to={`/products/${product.id}`}>
+                <Link to={`/products/${product._id}`}>
                   <div
                     className="relative w-full"
                     style={{ paddingBottom: '75%', background: C.accentLight }}
@@ -157,8 +202,6 @@ const Products = () => {
                     >
                       {product.emoji}
                     </div>
-
-                    {/* Badge */}
                     {product.badge && (
                       <span
                         className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
@@ -173,7 +216,6 @@ const Products = () => {
                   </div>
                 </Link>
 
-                {/* Wishlist */}
                 <button
                   onClick={() => handleToggleWishlist(product)}
                   className="absolute p-1.5 rounded-full transition-all"
@@ -181,16 +223,14 @@ const Products = () => {
                     top: '8px', right: '8px',
                     background: '#FFFFFF',
                     border: `1px solid ${C.accentBorder}`,
-                    color: isWishlisted(product.id) ? '#E53935' : C.textMuted,
+                    color: isWishlisted(product._id) ? '#E53935' : C.textMuted,
                   }}
-                  aria-label="Toggle wishlist"
                 >
-                  <TbHeart className="h-3.5 w-3.5" style={{ fill: isWishlisted(product.id) ? '#E53935' : 'none' }} />
+                  <TbHeart className="h-3.5 w-3.5" style={{ fill: isWishlisted(product._id) ? '#E53935' : 'none' }} />
                 </button>
 
-                {/* Info */}
                 <div className="p-3">
-                  <Link to={`/products/${product.id}`}>
+                  <Link to={`/products/${product._id}`}>
                     <h3
                       className="text-sm font-semibold mb-1 leading-snug transition-colors"
                       style={{ color: C.text }}
@@ -201,18 +241,12 @@ const Products = () => {
                     </h3>
                   </Link>
 
-                  {/* Rating */}
                   <div className="flex items-center gap-1 mb-2">
                     <TbStar className="h-3 w-3" style={{ color: '#F59E0B' }} />
-                    <span className="text-xs font-medium" style={{ color: C.text }}>
-                      {product.rating}
-                    </span>
-                    <span className="text-xs" style={{ color: C.textMuted }}>
-                      ({product.reviews})
-                    </span>
+                    <span className="text-xs font-medium" style={{ color: C.text }}>{product.rating}</span>
+                    <span className="text-xs" style={{ color: C.textMuted }}>({product.reviews})</span>
                   </div>
 
-                  {/* Price + Cart */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold" style={{ color: C.accent }}>
                       ${product.price.toLocaleString()}
@@ -220,22 +254,11 @@ const Products = () => {
                     <button
                       onClick={() => handleAddToCart(product)}
                       className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all"
-                      style={{
-                        background: C.accentLight,
-                        color: C.accent,
-                        border: `1px solid ${C.accentBorder}`,
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = C.accent
-                        e.currentTarget.style.color = '#FFFFFF'
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background = C.accentLight
-                        e.currentTarget.style.color = C.accent
-                      }}
+                      style={{ background: C.accentLight, color: C.accent, border: `1px solid ${C.accentBorder}` }}
+                      onMouseEnter={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.color = '#FFFFFF' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = C.accentLight; e.currentTarget.style.color = C.accent }}
                     >
-                      <TbShoppingCart className="h-3.5 w-3.5" />
-                      Add
+                      <TbShoppingCart className="h-3.5 w-3.5" /> Add
                     </button>
                   </div>
                 </div>
