@@ -27,22 +27,21 @@ const Login = () => {
 
   const valid = form.email && form.password
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!valid) return
     setError('')
     setSubmitting(true)
 
-    // ── Simulated delay — replace with real API call once backend is ready ──
-    setTimeout(() => {
-      const result = login(form)
-      setSubmitting(false)
-      if (result.success) {
-        navigate(redirectTo, { replace: true })
-      } else {
-        setError(result.error)
-      }
-    }, 500)
+    // ── Real API call — POST /api/auth/login ──
+    const result = await login(form)
+    setSubmitting(false)
+
+    if (result.success) {
+      navigate(redirectTo, { replace: true })
+    } else {
+      setError(result.error)
+    }
   }
 
   return (
