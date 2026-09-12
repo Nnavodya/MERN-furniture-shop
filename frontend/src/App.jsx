@@ -3,9 +3,17 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
 import { WishlistProvider, useWishlist } from './context/WishlistContext'
-import UserLayout     from "./components/layout/UserLayout";
-import Header         from './components/common/Header'
-import CartDrawer     from './components/layout/CartDrawer'
+
+// ── Layout ──
+import UserLayout    from "./components/layout/UserLayout";
+import AdminLayout   from './components/admin/AdminLayout'
+import AdminGuard    from './components/admin/AdminGuard'
+
+// ── Common ──
+import Header    from './components/common/Header'
+import CartDrawer from './components/layout/CartDrawer'
+
+// ── Customer Pages ──
 import Home           from './pages/Home'
 import Products       from './pages/Products'
 import ProductDetails from './pages/ProductDetails'
@@ -19,6 +27,11 @@ import Signup         from './pages/Signup'
 import Account        from './pages/Account'
 import Wishlist       from './pages/Wishlist'
 
+// ── Admin Pages ──
+import AdminDashboard from './components/admin/AdminDashboard'
+import AdminProducts  from './components/admin/AdminProducts'
+import AdminOrders    from './components/admin/AdminOrders'
+
 function AppShell() {
   const [cartOpen, setCartOpen] = useState(false)
 
@@ -27,22 +40,28 @@ function AppShell() {
 
   return (
     <BrowserRouter>
-      <Header
-        cartCount={cartCount}
-        wishlistCount={wishlistCount}
-        onCartClick={() => setCartOpen(true)}
-      />
-
-      <CartDrawer
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        items={cartItems}
-        onUpdateQty={updateQty}
-        onRemove={removeFromCart}
-      />
-
       <Routes>
-        <Route element={<UserLayout />}>
+
+        {/* ── Customer routes — with Header + Footer ── */}
+        <Route
+          element={
+            <>
+              <Header
+                cartCount={cartCount}
+                wishlistCount={wishlistCount}
+                onCartClick={() => setCartOpen(true)}
+              />
+              <CartDrawer
+                isOpen={cartOpen}
+                onClose={() => setCartOpen(false)}
+                items={cartItems}
+                onUpdateQty={updateQty}
+                onRemove={removeFromCart}
+              />
+              <UserLayout />
+            </>
+          }
+        >
           <Route path="/"             element={<Home />}           />
           <Route path="/products"     element={<Products />}       />
           <Route path="/products/:id" element={<ProductDetails />} />
@@ -56,8 +75,24 @@ function AppShell() {
           <Route path="/account"      element={<Account />}        />
           <Route path="/wishlist"     element={<Wishlist />}       />
         </Route>
-      </Routes>
 
+        {/* ── Admin routes — own layout, no Header/Footer ── */}
+        <Route
+          path="/admin/*"
+          element={
+            <AdminGuard>
+              <AdminLayout>
+                <Routes>
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="products"  element={<AdminProducts />}  />
+                  <Route path="orders"    element={<AdminOrders />}    />
+                </Routes>
+              </AdminLayout>
+            </AdminGuard>
+          }
+        />
+
+      </Routes>
     </BrowserRouter>
   );
 }

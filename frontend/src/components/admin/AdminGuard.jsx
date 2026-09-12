@@ -2,15 +2,14 @@ import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
-// ── Redirects to /login if not authenticated
-// ── Redirects to / if authenticated but not admin
-const AdminRoute = ({ children }) => {
+// Redirects unauthorized users away from admin routes.
+const AdminGuard = ({ children }) => {
   const { loading, isAuthenticated, isAdmin } = useAuth()
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#1A1008' }}>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>Loading…</p>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>Loading...</p>
       </div>
     )
   }
@@ -26,4 +25,4 @@ const AdminRoute = ({ children }) => {
   return children
 }
 
-export default AdminRoute;
+export default AdminGuard
