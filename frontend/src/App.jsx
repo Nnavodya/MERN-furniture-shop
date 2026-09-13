@@ -26,11 +26,12 @@ import Login          from './pages/Login'
 import Signup         from './pages/Signup'
 import Account        from './pages/Account'
 import Wishlist       from './pages/Wishlist'
+import MyOrders      from './pages/MyOrders'
 
 // ── Admin Pages ──
-import AdminDashboard from './components/admin/AdminDashboard'
-import AdminProducts  from './components/admin/AdminProducts'
-import AdminOrders    from './components/admin/AdminOrders'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminProducts  from './pages/admin/AdminProducts'
+import AdminOrders    from './pages/admin/AdminOrders'
 
 function AppShell() {
   const [cartOpen, setCartOpen] = useState(false)
@@ -74,6 +75,7 @@ function AppShell() {
           <Route path="/signup"       element={<Signup />}         />
           <Route path="/account"      element={<Account />}        />
           <Route path="/wishlist"     element={<Wishlist />}       />
+          <Route path="/my-orders"    element={<MyOrders />}       />
         </Route>
 
         {/* ── Admin routes — own layout, no Header/Footer ── */}
