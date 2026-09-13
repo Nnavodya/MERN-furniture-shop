@@ -1,6 +1,6 @@
 import React from 'react'
 import { Navigate, Link } from 'react-router-dom'
-import { TbUser, TbMail, TbLogout, TbShoppingBag, TbHeart } from 'react-icons/tb'
+import { TbUser, TbMail, TbLogout, TbShoppingBag, TbHeart, TbPackage } from 'react-icons/tb'
 import { useAuth } from '../context/AuthContext'
 
 const C = {
@@ -17,7 +17,6 @@ const C = {
 const Account = () => {
   const { user, isAuthenticated, logout } = useAuth()
 
-  // ── Not logged in — send to login, remember where they wanted to go ──
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: '/account' }} replace />
   }
@@ -41,6 +40,14 @@ const Account = () => {
                 <TbMail className="h-3.5 w-3.5" style={{ color: C.textMuted }} />
                 <p className="text-sm" style={{ color: C.textMuted }}>{user.email}</p>
               </div>
+              {user.role === 'admin' && (
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 inline-block"
+                  style={{ background: C.accentLight, color: C.accent }}
+                >
+                  ADMIN
+                </span>
+              )}
             </div>
           </div>
 
@@ -54,29 +61,36 @@ const Account = () => {
         </div>
 
         {/* Quick links */}
-        <div className="grid grid-cols-2 gap-4">
-          <Link
-            to="/cart"
-            className="flex flex-col items-center gap-2 p-6 rounded-xl text-center transition-all"
-            style={{ background: C.card, border: `1px solid ${C.divider}` }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = C.accentBorder}
-            onMouseLeave={e => e.currentTarget.style.borderColor = C.divider}
-          >
-            <TbShoppingBag className="h-6 w-6" style={{ color: C.accent }} />
-            <span className="text-sm font-semibold" style={{ color: C.text }}>My Cart</span>
-          </Link>
-
-          <Link
-            to="/wishlist"
-            className="flex flex-col items-center gap-2 p-6 rounded-xl text-center transition-all"
-            style={{ background: C.card, border: `1px solid ${C.divider}` }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = C.accentBorder}
-            onMouseLeave={e => e.currentTarget.style.borderColor = C.divider}
-          >
-            <TbHeart className="h-6 w-6" style={{ color: C.accent }} />
-            <span className="text-sm font-semibold" style={{ color: C.text }}>Wishlist</span>
-          </Link>
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { to: '/my-orders', icon: TbPackage,     label: 'My Orders'  },
+            { to: '/cart',      icon: TbShoppingBag, label: 'My Cart'    },
+            { to: '/wishlist',  icon: TbHeart,       label: 'Wishlist'   },
+          ].map(({ to, icon: Icon, label }) => (
+            <Link
+              key={to}
+              to={to}
+              className="flex flex-col items-center gap-2 p-6 rounded-xl text-center transition-all"
+              style={{ background: C.card, border: `1px solid ${C.divider}` }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = C.accentBorder}
+              onMouseLeave={e => e.currentTarget.style.borderColor = C.divider}
+            >
+              <Icon className="h-6 w-6" style={{ color: C.accent }} />
+              <span className="text-sm font-semibold" style={{ color: C.text }}>{label}</span>
+            </Link>
+          ))}
         </div>
+
+        {/* Admin link */}
+        {user.role === 'admin' && (
+          <Link
+            to="/admin/dashboard"
+            className="flex items-center justify-center gap-2 mt-4 py-3 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: C.accent, color: '#FFFFFF' }}
+          >
+            Go to Admin Panel →
+          </Link>
+        )}
       </div>
     </div>
   )
