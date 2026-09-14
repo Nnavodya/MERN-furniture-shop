@@ -24,6 +24,14 @@ const categories = [
   'living-room','bedroom','dining','office','outdoor','storage','lighting','decor',
 ]
 
+
+  const Field = ({ label, children }) => (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-semibold" style={{ color: C.textMuted }}>{label}</label>
+      {children}
+    </div>
+  )
+  
 const AdminProducts = () => {
   const [products, setProducts] = useState([])
   const [loading, setLoading]   = useState(true)
@@ -109,12 +117,6 @@ const AdminProducts = () => {
     p.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  const Field = ({ label, children }) => (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold" style={{ color: C.textMuted }}>{label}</label>
-      {children}
-    </div>
-  )
 
   const inputStyle = {
     background: C.input, border: `1px solid ${C.border}`,
