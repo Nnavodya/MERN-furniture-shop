@@ -72,12 +72,20 @@ const Wishlist = () => {
                   className="relative w-full flex items-center justify-center"
                   style={{ paddingBottom: '75%', background: C.accentLight }}
                 >
-                  <div
-                    className="absolute inset-0 flex items-center justify-center text-4xl"
-                    style={{ color: 'rgba(139,94,46,0.2)' }}
-                  >
-                    {product.emoji}
-                  </div>
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center text-4xl"
+                      style={{ color: 'rgba(139,94,46,0.2)' }}
+                    >
+                      {product.emoji}
+                    </div>
+                  )}
                 </div>
               </Link>
 
