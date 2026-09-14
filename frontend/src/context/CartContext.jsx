@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'
+import React, { createContext, useState, useEffect, useContext, useRef } from 'react'
 
 export const CartContext = createContext()
 
@@ -7,6 +7,8 @@ export const useCart = () => useContext(CartContext)
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([])
+  const [cartMessage, setCartMessage] = useState('')
+  const lastAddedRef = useRef({ id: null, at: 0 })
 
   // ── Load cart from localStorage on first mount ──
   useEffect(() => {
@@ -30,6 +32,12 @@ export const CartProvider = ({ children }) => {
 
   // ── Add product to cart (or bump qty if it already exists) ──
   const addToCart = (product, qty = 1) => {
+    const now = Date.now()
+    if (lastAddedRef.current.id === product.id && now - lastAddedRef.current.at < 700) {
+      return
+    }
+    lastAddedRef.current = { id: product.id, at: now }
+
     setCartItems(prev => {
       const exists = prev.find(item => item.id === product.id)
       if (exists) {
@@ -41,6 +49,8 @@ export const CartProvider = ({ children }) => {
       }
       return [...prev, { ...product, qty }]
     })
+    setCartMessage(`${product.name} added to cart`)
+    window.setTimeout(() => setCartMessage(''), 2000)
   }
 
   // ── Remove an item completely ──
@@ -76,6 +86,7 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider value={{
       cartItems,
       cartCount,
+      cartMessage,
       addToCart,
       removeFromCart,
       updateQty,
