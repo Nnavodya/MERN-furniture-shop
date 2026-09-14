@@ -196,12 +196,21 @@ const Products = () => {
                     className="relative w-full"
                     style={{ paddingBottom: '75%', background: C.accentLight }}
                   >
-                    <div
-                      className="absolute inset-0 flex items-center justify-center text-4xl"
-                      style={{ color: 'rgba(139,94,46,0.2)' }}
-                    >
-                      {product.emoji}
-                    </div>
+                    {/* ✅ Fix — real image or emoji fallback */}
+{product.imageUrl ? (
+  <img
+    src={product.imageUrl}
+    alt={product.name}
+    className="absolute inset-0 w-full h-full object-cover"
+  />
+) : (
+  <div
+    className="absolute inset-0 flex items-center justify-center text-4xl"
+    style={{ color: 'rgba(139,94,46,0.2)' }}
+  >
+    {product.emoji}
+  </div>
+)}
                     {product.badge && (
                       <span
                         className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full"

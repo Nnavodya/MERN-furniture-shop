@@ -153,9 +153,18 @@ const ProductDetails = () => {
               className="relative rounded-2xl flex items-center justify-center"
               style={{ background: C.accentLight, aspectRatio: '1/1' }}
             >
-              <span style={{ fontSize: '7rem', color: 'rgba(139,94,46,0.25)' }}>
-                {product.emoji}
-              </span>
+              {product.imageUrl ? (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover rounded-2xl"
+                  style={{ aspectRatio: '1/1' }}
+                />
+              ) : (
+                <span style={{ fontSize: '7rem', color: 'rgba(139,94,46,0.25)' }}>
+                  {product.emoji}
+                </span>
+              )}
               {product.badge && (
                 <span
                   className="absolute top-4 left-4 text-xs font-bold px-3 py-1 rounded-full"
