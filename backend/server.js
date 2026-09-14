@@ -21,6 +21,9 @@ app.use('/api/auth',     authRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/orders',   orderRoutes)
 
+const uploadRoutes = require('./routes/uploadRoutes')
+app.use('/api/upload', uploadRoutes)
+
 // ── Health check ──
 app.get('/', (req, res) => {
   res.json({ message: 'FurniHub API is running' })
