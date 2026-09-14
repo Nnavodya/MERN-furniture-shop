@@ -57,6 +57,10 @@ const productSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    imageUrl: {
+    type: String,
+    default: '',
+},
   },
   { timestamps: true }
 )
