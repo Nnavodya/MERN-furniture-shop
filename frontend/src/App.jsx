@@ -37,7 +37,7 @@ import AdminOrders    from './pages/admin/AdminOrders'
 function AppShell() {
   const [cartOpen, setCartOpen] = useState(false)
 
-  const { cartItems, cartCount, updateQty, removeFromCart } = useCart()
+  const { cartItems, cartCount, cartMessage, updateQty, removeFromCart } = useCart()
   const { wishlistCount } = useWishlist()
 
   return (
@@ -60,6 +60,15 @@ function AppShell() {
                 onUpdateQty={updateQty}
                 onRemove={removeFromCart}
               />
+              {cartMessage && (
+                <div
+                  className="fixed right-4 top-20 z-50 rounded-xl px-4 py-3 text-sm font-semibold shadow-lg"
+                  style={{ background: '#2C1A0E', color: '#FFFFFF' }}
+                  role="status"
+                >
+                  {cartMessage}
+                </div>
+              )}
               <UserLayout />
             </>
           }
