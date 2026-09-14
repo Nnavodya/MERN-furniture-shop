@@ -27,6 +27,7 @@ import Signup         from './pages/Signup'
 import Account        from './pages/Account'
 import Wishlist       from './pages/Wishlist'
 import MyOrders      from './pages/MyOrders'
+import NotFound      from './pages/NotFound'
 
 // ── Admin Pages ──
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -76,6 +77,7 @@ function AppShell() {
           <Route path="/account"      element={<Account />}        />
           <Route path="/wishlist"     element={<Wishlist />}       />
           <Route path="/my-orders"    element={<MyOrders />}       />
+          <Route path="*"            element={<NotFound />}       />
         </Route>
 
         {/* ── Admin routes — own layout, no Header/Footer ── */}
