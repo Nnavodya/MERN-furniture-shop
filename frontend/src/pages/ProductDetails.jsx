@@ -106,6 +106,7 @@ const ProductDetails = () => {
       name:     product.name,
       price:    product.price,
       emoji:    product.emoji,
+      imageUrl: product.imageUrl,
       category: categoryLabel,
     }, qty)
     setJustAdded(true)
@@ -123,6 +124,7 @@ const ProductDetails = () => {
       name:    product.name,
       price:   product.price,
       emoji:   product.emoji,
+      imageUrl: product.imageUrl,
       rating:  product.rating,
       reviews: product.reviews,
     })
