@@ -17,6 +17,7 @@ const C = {
 const EMPTY_FORM = {
   name: '', category: 'living-room', price: '', oldPrice: '',
   badge: '', emoji: '🪑', description: '', inStock: true, sku: '',
+  imageUrl: '', 
 }
 
 const categories = [
@@ -311,6 +312,37 @@ const AdminProducts = () => {
                   onChange={e => setForm({...form, description: e.target.value})}
                 />
               </Field>
+
+              {/* Image Upload */}
+<Field label="Product Image">
+  <input
+    type="file"
+    accept="image/*"
+    onChange={async (e) => {
+      const file = e.target.files[0]
+      if (!file) return
+      const formData = new FormData()
+      formData.append('image', file)
+      try {
+        const { data } = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        setForm(f => ({ ...f, imageUrl: data.url }))
+      } catch (err) {
+        setError('Image upload failed.')
+      }
+    }}
+    style={{ ...inputStyle, padding: '6px 12px' }}
+  />
+  {form.imageUrl && (
+    <img
+      src={form.imageUrl}
+      alt="Preview"
+      className="mt-2 rounded-lg object-cover"
+      style={{ height: '120px', width: '100%', border: `1px solid ${C.border}` }}
+    />
+  )}
+</Field>
 
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
