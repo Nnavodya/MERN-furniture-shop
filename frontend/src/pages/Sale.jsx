@@ -26,6 +26,7 @@ const Sale = () => {
   const handleAddToCart = (product) => {
     addToCart({
       id: product.id, name: product.name, price: product.price, emoji: product.emoji,
+      imageUrl: product.imageUrl,
       category: categories.find(c => c.path === product.category)?.label || '',
     })
   }
@@ -33,7 +34,8 @@ const Sale = () => {
   const handleToggleWishlist = (product) => {
     toggleWishlist({
       id: product.id, name: product.name, price: product.price,
-      emoji: product.emoji, rating: product.rating, reviews: product.reviews,
+      emoji: product.emoji, imageUrl: product.imageUrl,
+      rating: product.rating, reviews: product.reviews,
     })
   }
 
@@ -92,9 +94,17 @@ const Sale = () => {
                       className="relative w-full flex items-center justify-center text-4xl"
                       style={{ paddingBottom: '75%', background: C.accentLight }}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center text-4xl" style={{ color: 'rgba(139,94,46,0.2)' }}>
-                        {product.emoji}
-                      </div>
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-4xl" style={{ color: 'rgba(139,94,46,0.2)' }}>
+                          {product.emoji}
+                        </div>
+                      )}
                       <span
                         className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
                         style={{ background: '#E53935', color: '#FFFFFF' }}
