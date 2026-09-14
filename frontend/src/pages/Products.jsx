@@ -81,6 +81,7 @@ const Products = () => {
       name:  product.name,
       price: product.price,
       emoji: product.emoji,
+      imageUrl: product.imageUrl,
       category: categories.find(c => c.path === product.category)?.label || '',
     })
   }
@@ -91,6 +92,7 @@ const Products = () => {
       name:    product.name,
       price:   product.price,
       emoji:   product.emoji,
+      imageUrl: product.imageUrl,
       rating:  product.rating,
       reviews: product.reviews,
     })
