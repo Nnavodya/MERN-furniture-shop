@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
 import { WishlistProvider, useWishlist } from './context/WishlistContext'
+import RoomAnalyzer from './pages/RoomAnalyzer'
 
 // ── Layout ──
 import UserLayout    from "./components/layout/UserLayout";
@@ -87,6 +88,7 @@ function AppShell() {
           <Route path="/wishlist"     element={<Wishlist />}       />
           <Route path="/my-orders"    element={<MyOrders />}       />
           <Route path="*"            element={<NotFound />}       />
+          <Route path="/room-analyzer" element={<RoomAnalyzer />} />
         </Route>
 
         {/* ── Admin routes — own layout, no Header/Footer ── */}
