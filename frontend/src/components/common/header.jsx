@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import {
   TbArmchair, TbLayoutGrid, TbHome, TbTag,
   TbInfoCircle, TbMail, TbSearch, TbHeart,
-  TbShoppingCart, TbUser, TbChevronDown, TbX, TbMenu2
+  TbShoppingCart, TbUser, TbChevronDown, TbX, TbMenu2,TbCamera 
 } from 'react-icons/tb'
 
 // ── Design Tokens (Light Theme) ────────────────────────
@@ -241,6 +241,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
             <NavLink to="/sale"    icon={TbTag}>Sale</NavLink>
             <NavLink to="/about"   icon={TbInfoCircle}>About</NavLink>
             <NavLink to="/contact" icon={TbMail}>Contact</NavLink>
+            <NavLink to="/room-analyzer" icon={TbCamera}>Room AI</NavLink>
           </nav>
 
           {/* Actions */}
@@ -349,6 +350,7 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
               { to: '/sale',     icon: TbTag,        label: 'Sale'     },
               { to: '/about',    icon: TbInfoCircle, label: 'About'    },
               { to: '/contact',  icon: TbMail,       label: 'Contact'  },
+              { to: '/room-analyzer', icon: TbCamera, label: 'Room AI' },
             ].map(({ to, icon: Icon, label }) => (
               <Link
                 key={to}
