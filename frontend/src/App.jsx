@@ -29,6 +29,11 @@ import Account        from './pages/Account'
 import Wishlist       from './pages/Wishlist'
 import MyOrders      from './pages/MyOrders'
 import NotFound      from './pages/NotFound'
+import FAQ            from './pages/FAQ'
+import ShippingPolicy from './pages/ShippingPolicy'
+import Returns        from './pages/Returns'
+import PrivacyPolicy  from './pages/PrivacyPolicy'
+import Terms          from './pages/Terms'
 
 // ── Admin Pages ──
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -87,6 +92,11 @@ function AppShell() {
           <Route path="/account"      element={<Account />}        />
           <Route path="/wishlist"     element={<Wishlist />}       />
           <Route path="/my-orders"    element={<MyOrders />}       />
+          <Route path="/faq"             element={<FAQ />}            />
+          <Route path="/shipping-policy" element={<ShippingPolicy />} />
+          <Route path="/returns"         element={<Returns />}        />
+          <Route path="/privacy-policy"  element={<PrivacyPolicy />}  />
+          <Route path="/terms"           element={<Terms />}          />    
           <Route path="*"            element={<NotFound />}       />
           <Route path="/room-analyzer" element={<RoomAnalyzer />} />
         </Route>
