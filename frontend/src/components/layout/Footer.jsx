@@ -244,29 +244,26 @@ const Footer = () => {
                 Customer Service
               </h3>
               <ul className="space-y-3">
-                {[
-                  "FAQ",
-                  "Shipping Policy",
-                  "Returns & Refunds",
-                  "Privacy Policy",
-                  "Terms & Conditions",
-                ].map((item) => (
-                  <li key={item}>
-                    <Link
-                      to="#"
-                      className="text-sm transition-all duration-150"
-                      style={{ color: "rgba(255,255,255,0.70)" }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.color = "#D4A373")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.color = "rgba(255,255,255,0.70)")
-                      }
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                
+{[
+  { label: "FAQ",               to: "/faq"             },
+  { label: "Shipping Policy",   to: "/shipping-policy" },
+  { label: "Returns & Refunds", to: "/returns"         },
+  { label: "Privacy Policy",    to: "/privacy-policy"  },
+  { label: "Terms & Conditions",to: "/terms"           },
+].map((item) => (
+  <li key={item.label}>
+    <Link
+      to={item.to}
+      className="text-sm transition-all duration-150"
+      style={{ color: "rgba(255,255,255,0.70)" }}
+      onMouseEnter={(e) => (e.currentTarget.style.color = "#D4A373")}
+      onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.70)")}
+    >
+      {item.label}
+    </Link>
+  </li>
+))}
               </ul>
             </div>
 
