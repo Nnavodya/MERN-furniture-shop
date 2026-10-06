@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { TbShoppingBag, TbChevronDown, TbArrowRight } from 'react-icons/tb'
 import { useAuth } from '../context/AuthContext'
@@ -30,12 +30,9 @@ const MyOrders = () => {
   const [error, setError]       = useState('')
   const [expanded, setExpanded] = useState(null)
 
-  // ── Redirect if not logged in ──
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: '/my-orders' }} replace />
-  }
-
   useEffect(() => {
+    if (!isAuthenticated) return
+
     const fetchOrders = async () => {
       try {
         setLoading(true)
@@ -49,7 +46,12 @@ const MyOrders = () => {
       }
     }
     fetchOrders()
-  }, [])
+  }, [isAuthenticated])
+
+  // ── Redirect if not logged in ──
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: '/my-orders' }} replace />
+  }
 
   return (
     <div style={{ background: C.bg, minHeight: '100vh' }}>
