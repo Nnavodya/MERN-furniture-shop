@@ -1,192 +1,156 @@
-# MERN Furniture Shop
+# FurniHub — Full-Stack MERN Furniture E-Commerce Platform
 
-A full-stack furniture e-commerce web application built using the MERN stack (MongoDB, Express.js, React.js, and Node.js). This project is currently under development as part of my software engineering internship preparation and portfolio development.
-
----
-
-## Project Overview
-
-MERN Furniture Shop is an online furniture shopping platform where users can browse products, manage carts, place orders, and securely authenticate accounts. The application also includes an admin dashboard for managing products, users, and orders.
+A full-featured furniture e-commerce web application built with the MERN stack, featuring AI-powered room analysis, JWT authentication, an admin dashboard, and Cloudinary image uploads.
 
 ---
 
-## Features
+## 🌐 Live Demo
 
-### Customer Features
-- User registration and login using JWT authentication
-- Browse furniture products by category
-- Search and filter products
-- Add products to cart and wishlist
-- Product detail page with images and descriptions
-- Order placement and order tracking
-- Product reviews and ratings
-- Responsive user interface for desktop and mobile devices
-
-### Admin Features
-- Add, update, and delete products
-- Manage customer orders
-- Upload product images
-- Monitor sales and product inventory
+> Coming soon
 
 ---
 
-## Tech Stack
+## ✨ Features
 
-| Category | Technology |
-|----------|-------------|
-| Frontend | React.js, Tailwind CSS |
+### Customer
+- Browse and search furniture by category, price, and rating
+- AI-powered Room Analyzer — upload a room photo, get furniture suggestions (Google Gemini Vision API)
+- Product detail pages with colour swatches, image gallery, and related products
+- Shopping cart with persistent localStorage state
+- Wishlist with localStorage persistence
+- Multi-step checkout (Shipping → Payment → Review → Order confirmation)
+- User authentication — signup, login, JWT session
+- My Orders page — view past orders with status tracking
+- Account page with admin panel shortcut
+
+### Admin
+- Protected admin panel (`/admin/*`) — role-based access control
+- Dashboard with real-time stats: total products, orders, users, and revenue
+- Product management — add, edit, delete with Cloudinary image upload
+- Order management — view all orders, update order status
+
+### Pages
+- Home, Products, Product Details, Cart, Checkout
+- Sale, About, Contact, Wishlist, My Orders, Account
+- Room Analyzer (AI), FAQ, Shipping Policy, Returns & Refunds, Privacy Policy, Terms & Conditions
+- 404 Not Found
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19, Vite, Tailwind CSS v4 |
 | Backend | Node.js, Express.js |
-| Database | MongoDB Atlas |
-| Authentication | JWT (JSON Web Token) |
-| State Management | Redux Toolkit |
-| Image Uploads | Cloudinary |
-| Payment Integration | Stripe |
-| Version Control | Git & GitHub |
+| Database | MongoDB Atlas (Mongoose) |
+| Auth | JWT, bcryptjs |
+| Image Upload | Cloudinary + Multer |
+| AI Analysis | Google Gemini Vision API |
+| HTTP Client | Axios |
+| Icons | React Icons (Tabler) |
+| Routing | React Router DOM v7 |
 
 ---
 
-## Project Status
+## 📁 Project Structure
 
-🚧 Ongoing Project
-
-Current Progress:
-- [x] Repository setup
-- [x] Backend folder structure
-- [x] Frontend folder structure
-- [x] MongoDB configuration
-- [ ] Authentication system
-- [ ] Product management APIs
-- [ ] Shopping cart functionality
-- [ ] Payment integration
-- [ ] Admin dashboard
-- [ ] Deployment
-
----
-
-## Installation Guide
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Nnavodya/MERN-furniture-shop.git
-cd MERN-FurnitureShop
+```
+MERN_FurnitureShop/
+├── backend/
+│   ├── config/          # DB + Cloudinary config
+│   ├── controllers/     # Auth, Product, Order logic
+│   ├── middleware/       # JWT protect + admin guard
+│   ├── models/          # User, Product, Order schemas
+│   ├── routes/          # API route definitions
+│   ├── seed.js          # Database seed script
+│   └── server.js        # Express entry point
+└── frontend/
+    └── src/
+        ├── api/         # Axios instance
+        ├── components/  # Shared UI components
+        ├── context/     # Cart, Auth, Wishlist contexts
+        ├── pages/       # All route pages
+        └── App.jsx      # Route definitions
 ```
 
 ---
 
-### 2. Install Backend Dependencies
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js v18+
+- MongoDB Atlas account
+- Cloudinary account
+- Google AI Studio API key
+
+### 1. Clone the repository
 
 ```bash
-cd server
+git clone https://github.com/Nnavodya/MERN_FurnitureShop.git
+cd MERN_FurnitureShop
+```
+
+### 2. Backend setup
+
+```bash
+cd backend
 npm install
 ```
 
----
-
-### 3. Install Frontend Dependencies
-
-```bash
-cd ../client
-npm install
-```
-
----
-
-### 4. Create Environment Variables
-
-Create a `.env` file inside the `server` folder and add:
+Create a `.env` file in the `backend/` folder:
 
 ```env
-MONGODB_URL=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/furnihub?retryWrites=true&w=majority
+JWT_SECRET=your_jwt_secret_key
 PORT=5000
-CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-STRIPE_SECRET_KEY=your_stripe_secret_key
+CLIENT_URL=http://localhost:5173
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
----
-
-### 5. Start the Backend Server
+Seed the database with sample products:
 
 ```bash
-cd server
-npm start
+node seed.js
 ```
 
----
-
-### 6. Start the Frontend Application
+Start the backend server:
 
 ```bash
-cd client
 npm run dev
 ```
 
----
+### 3. Frontend setup
 
-### 7. Open in Browser
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
 
-```txt
+### 4. Open in browser
+
+```
 http://localhost:5173
 ```
 
 ---
 
-## Folder Structure
+## 🔐 Admin Access
 
-```txt
-MERN-furniture-shop/
-│
-├── client/                 # React frontend
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── redux/
-│       └── assets/
-│
-├── server/                 # Node.js backend
-│   ├── config/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   └── middleware/
-│
-├── README.md
-└── .gitignore
-```
+The first user to sign up is automatically assigned the `admin` role. Navigate to `/admin/dashboard` after logging in.
 
 ---
 
-## Learning Objectives
+## 📸 Screenshots
 
-This project helps me improve my skills in:
-
-- Full-stack MERN development
-- REST API development
-- JWT authentication and authorization
-- MongoDB database management
-- Responsive frontend design
-- Git and GitHub collaboration
-- E-commerce application architecture
+> Add screenshots here
 
 ---
 
-## Future Improvements
+## 📄 License
 
-- Online payment gateway integration
-- Product recommendation system
-- Order email notifications
-- Dark mode support
-- Real-time order tracking
-- AI-based furniture recommendations
-
----
-
-## Author
-
-**Nethmi Navodya**
-
-GitHub:  
-https://github.com/Nnavodya
+This project is for educational and portfolio purposes.
