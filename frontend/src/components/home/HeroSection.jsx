@@ -2,7 +2,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbArrowRight, TbPlayerPlay } from 'react-icons/tb'
-import heroImg from '../../assets/Hero.jpg'
+import heroImg from '../assets/Hero.webp'
 
 const C = {
   bg:      '#FAF7F4',
