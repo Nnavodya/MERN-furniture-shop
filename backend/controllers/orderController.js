@@ -2,20 +2,56 @@ const Order = require('../models/Order')
 const Product = require('../models/Product')
 const User = require('../models/User')
 
+// Shipping rule (must match the frontend): free over $100, otherwise $25
+const calcShipping = subtotal => (subtotal >= 100 ? 0 : 25)
+
 // ── POST /api/orders — logged-in user places an order ──
+// Prices and totals are ALWAYS recomputed from the database; client values are ignored.
 const createOrder = async (req, res) => {
   try {
-    const { items, shippingAddress, paymentMethod, subtotal, shippingCost, total } = req.body
+    const { items, shippingAddress, paymentMethod, paymentIntentId } = req.body
 
-    if (!items?.length) {
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: 'Order must contain at least one item' })
     }
+    if (!['card', 'cod'].includes(paymentMethod)) {
+      return res.status(400).json({ message: 'Invalid payment method' })
+    }
+
+    // Merge duplicate lines and validate quantities
+    const qtyById = new Map()
+    for (const it of items) {
+      const qty = Number(it.qty)
+      if (!it.product || !Number.isInteger(qty) || qty < 1 || qty > 20) {
+        return res.status(400).json({ message: 'Invalid item or quantity' })
+      }
+      const id = String(it.product)
+      qtyById.set(id, (qtyById.get(id) || 0) + qty)
+    }
+
+    const products = await Product.find({ _id: { $in: [...qtyById.keys()] } })
+    if (products.length !== qtyById.size) {
+      return res.status(400).json({ message: 'One or more products no longer exist' })
+    }
+
+    const orderItems = products.map(p => ({
+      product: p._id,
+      name:    p.name,
+      price:   p.price,
+      qty:     qtyById.get(String(p._id)),
+      emoji:   p.emoji || '🪑',
+    }))
+
+    const subtotal     = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0)
+    const shippingCost = calcShipping(subtotal)
+    const total        = subtotal + shippingCost
 
     const order = await Order.create({
       user: req.user._id,
-      items,
+      items: orderItems,
       shippingAddress,
       paymentMethod,
+      paymentIntentId: paymentMethod === 'card' ? paymentIntentId : undefined,
       subtotal,
       shippingCost,
       total,
@@ -23,7 +59,7 @@ const createOrder = async (req, res) => {
 
     res.status(201).json(order)
   } catch (err) {
-    res.status(400).json({ message: 'Failed to place order', error: err.message })
+    res.status(400).json({ message: 'Failed to place order' })
   }
 }
 

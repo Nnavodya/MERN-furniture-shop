@@ -34,6 +34,7 @@ const orderSchema = new mongoose.Schema(
       enum: ['card', 'cod'],
       required: true,
     },
+    paymentIntentId: String,
     subtotal:     { type: Number, required: true },
     shippingCost: { type: Number, required: true, default: 0 },
     total:        { type: Number, required: true },
