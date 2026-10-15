@@ -19,6 +19,13 @@ const C = {
   divider:      'rgba(139,94,46,0.12)',
 }
 
+// ── Card input helpers (demo / simulated payment) ───────
+const formatCard   = v => v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
+const formatExpiry = v => {
+  const d = v.replace(/\D/g, '').slice(0, 4)
+  return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d
+}
+
 const steps = [
   { key: 'shipping', label: 'Shipping',  icon: TbTruck      },
   { key: 'payment',  label: 'Payment',   icon: TbCreditCard },
@@ -231,11 +238,20 @@ const Checkout = () => {
   }
 
   const shippingValid = shipping.fullName && shipping.email && shipping.address && shipping.city && shipping.postalCode
-  const paymentValid  = payment.method === 'cod' || (payment.cardNumber && payment.expiry && payment.cvc && payment.nameOnCard)
+  const cardDigits    = payment.cardNumber.replace(/\D/g, '')
+  const paymentValid  = payment.method === 'cod' ||
+    (cardDigits.length === 16 && /^\d{2}\/\d{2}$/.test(payment.expiry) && payment.cvc.length >= 3 && payment.nameOnCard.trim())
 
   const handlePlaceOrder = async () => {
     setPlacing(true)
     try {
+      let paymentIntentId = null
+      if (payment.method === 'card') {
+        // SIMULATED: backend returns a fake client secret (no real charge is made)
+        const { data: intent } = await api.post('/payment/create-intent', { amount: subtotal + shippingCost })
+        paymentIntentId = intent.clientSecret.split('_secret_')[0]
+      }
+
       const { data } = await api.post('/orders', {
         items: cartItems.map(i => ({
           product:  i.id,
@@ -246,6 +262,7 @@ const Checkout = () => {
         })),
         shippingAddress: shipping,
         paymentMethod:   payment.method,
+        paymentIntentId,
         subtotal,
         shippingCost,
         total: subtotal + shippingCost,
@@ -382,6 +399,13 @@ const Checkout = () => {
 
                 {payment.method === 'card' ? (
                   <>
+                    <div
+                      className="mb-4 p-3 rounded-lg text-xs"
+                      style={{ background: C.accentLight, color: C.textMuted, border: `1px solid ${C.accentBorder}` }}
+                    >
+                      🧪 Demo mode — payments are simulated and no real charge is made. Use test card
+                      <strong style={{ color: C.text }}> 4242 4242 4242 4242</strong>, any future expiry, any CVC.
+                    </div>
                     <div className="mb-4">
                       <Field
                         label="Name on Card" placeholder="Nethmi Rajapaksha"
@@ -393,19 +417,22 @@ const Checkout = () => {
                       <Field
                         label="Card Number" placeholder="1234 5678 9012 3456" maxLength={19}
                         value={payment.cardNumber}
-                        onChange={e => setPayment({ ...payment, cardNumber: e.target.value })}
+                        inputMode="numeric"
+                        onChange={e => setPayment({ ...payment, cardNumber: formatCard(e.target.value) })}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-6">
                       <Field
                         label="Expiry Date" placeholder="MM/YY" maxLength={5}
                         value={payment.expiry}
-                        onChange={e => setPayment({ ...payment, expiry: e.target.value })}
+                        inputMode="numeric"
+                        onChange={e => setPayment({ ...payment, expiry: formatExpiry(e.target.value) })}
                       />
                       <Field
                         label="CVC" placeholder="123" maxLength={4}
                         value={payment.cvc}
-                        onChange={e => setPayment({ ...payment, cvc: e.target.value })}
+                        inputMode="numeric"
+                        onChange={e => setPayment({ ...payment, cvc: e.target.value.replace(/\D/g, '') })}
                       />
                     </div>
                   </>
