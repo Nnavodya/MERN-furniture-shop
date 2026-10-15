@@ -20,11 +20,8 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: 'An account with this email already exists' })
     }
 
-    // First registered user becomes admin automatically (convenience for dev/demo)
-    const userCount = await User.countDocuments()
-    const role = userCount === 0 ? 'admin' : 'user'
-
-    const user = await User.create({ name, email, password, role })
+    // Public signup ALWAYS creates a normal user. Promote admins with: npm run make-admin -- <email>
+    const user = await User.create({ name, email, password, role: 'user' })
 
     res.status(201).json({
       _id: user._id,
@@ -34,7 +31,7 @@ const signup = async (req, res) => {
       token: generateToken(user._id),
     })
   } catch (err) {
-    res.status(500).json({ message: 'Signup failed', error: err.message })
+    res.status(500).json({ message: 'Signup failed' })
   }
 }
 
@@ -60,7 +57,7 @@ const login = async (req, res) => {
       token: generateToken(user._id),
     })
   } catch (err) {
-    res.status(500).json({ message: 'Login failed', error: err.message })
+    res.status(500).json({ message: 'Login failed' })
   }
 }
 
