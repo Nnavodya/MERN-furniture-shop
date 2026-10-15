@@ -141,7 +141,7 @@ http://localhost:5173
 
 ## 🔐 Admin Access
 
-The first user to sign up is automatically assigned the `admin` role. Navigate to `/admin/dashboard` after logging in.
+Admin access is granted via npm run make-admin -- <email>.Navigate to `/admin/dashboard` after logging in.
 
 ---
 
