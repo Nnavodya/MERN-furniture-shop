@@ -1,55 +1,38 @@
-# FurniHub — Full-Stack MERN Furniture E-Commerce Platform
+# FurniHub 🛋️
 
-A full-featured furniture e-commerce web application built with the MERN stack, featuring AI-powered room analysis, JWT authentication, an admin dashboard, and Cloudinary image uploads.
-
----
-
-## 🌐 Live Demo
-
-> Coming soon
+A full-stack MERN e-commerce platform for furniture shopping, featuring AI-powered room analysis, JWT authentication, an admin dashboard, and Cloudinary image uploads.
 
 ---
 
-## ✨ Features
+## 🚀 Live Features
 
-### Customer
-- Browse and search furniture by category, price, and rating
-- AI-powered Room Analyzer — upload a room photo, get furniture suggestions (Google Gemini Vision API)
-- Product detail pages with colour swatches, image gallery, and related products
-- Shopping cart with persistent localStorage state
-- Wishlist with localStorage persistence
-- Multi-step checkout (Shipping → Payment → Review → Order confirmation)
-- User authentication — signup, login, JWT session
-- My Orders page — view past orders with status tracking
-- Account page with admin panel shortcut
-
-### Admin
-- Protected admin panel (`/admin/*`) — role-based access control
-- Dashboard with real-time stats: total products, orders, users, and revenue
-- Product management — add, edit, delete with Cloudinary image upload
-- Order management — view all orders, update order status
-
-### Pages
-- Home, Products, Product Details, Cart, Checkout
-- Sale, About, Contact, Wishlist, My Orders, Account
-- Room Analyzer (AI), FAQ, Shipping Policy, Returns & Refunds, Privacy Policy, Terms & Conditions
-- 404 Not Found
+- **Product Catalog** — Browse, search, and filter by category
+- **AI Room Analyzer** — Upload a room photo; Google Gemini Vision suggests matching furniture
+- **Shopping Cart** — Add products, adjust quantities, persist across sessions
+- **Wishlist** — Save favourite products
+- **Checkout** — Multi-step flow (Shipping → Payment → Review) with Cash on Delivery and a *simulated* card payment (demo mode, no real charges)
+- **Server-side order pricing** — prices, shipping and totals are always recalculated from the database; client values are ignored
+- **Authentication** — JWT-based signup/login with role-based access (user / admin)
+- **Admin Panel** — Dashboard stats, full product CRUD, order management with status updates
+- **Cloudinary Uploads** — Admin can upload real product images
+- **My Orders** — Users can view their order history
+- **Security basics** — Helmet headers, rate limiting (stricter on auth and AI routes), startup env validation, no internal error details in production
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, Vite, Tailwind CSS v4 |
-| Backend | Node.js, Express.js |
-| Database | MongoDB Atlas (Mongoose) |
-| Auth | JWT, bcryptjs |
-| Image Upload | Cloudinary + Multer |
-| AI Analysis | Google Gemini Vision API |
-| HTTP Client | Axios |
-| Icons | React Icons (Tabler) |
-| Routing | React Router DOM v7 |
+| Layer      | Technology                                      |
+|------------|-------------------------------------------------|
+| Frontend   | React 19, Vite, Tailwind CSS, React Router v7   |
+| State      | React Context API (Cart, Auth, Wishlist)        |
+| HTTP       | Axios with JWT interceptor                      |
+| Backend    | Node.js, Express.js                             |
+| Database   | MongoDB Atlas (Mongoose)                        |
+| Auth       | JWT + bcryptjs                                  |
+| Security   | Helmet, express-rate-limit                      |
+| Images     | Cloudinary + Multer                             |
+| AI         | Google Gemini Vision API                        |
 
 ---
 
@@ -58,25 +41,26 @@ A full-featured furniture e-commerce web application built with the MERN stack, 
 ```
 MERN_FurnitureShop/
 ├── backend/
-│   ├── config/          # DB + Cloudinary config
+│   ├── config/          # DB, Cloudinary, env validation
 │   ├── controllers/     # Auth, Product, Order logic
 │   ├── middleware/       # JWT protect + admin guard
 │   ├── models/          # User, Product, Order schemas
-│   ├── routes/          # API route definitions
-│   ├── seed.js          # Database seed script
+│   ├── routes/          # API routes
+│   ├── seed.js          # Seed 12 products into DB
+│   ├── makeAdmin.js     # Promote a user to admin (CLI)
 │   └── server.js        # Express entry point
 └── frontend/
     └── src/
-        ├── api/         # Axios instance
-        ├── components/  # Shared UI components
-        ├── context/     # Cart, Auth, Wishlist contexts
-        ├── pages/       # All route pages
-        └── App.jsx      # Route definitions
+        ├── api/          # Axios instance
+        ├── components/   # Header, Footer, Admin UI
+        ├── context/      # Cart, Auth, Wishlist contexts
+        ├── pages/        # All route pages
+        └── App.jsx
 ```
 
 ---
 
-## 🚀 Getting Started
+## ⚙️ Getting Started
 
 ### Prerequisites
 - Node.js v18+
@@ -98,26 +82,31 @@ cd backend
 npm install
 ```
 
-Create a `.env` file in the `backend/` folder:
+Create `backend/.env`:
 
 ```env
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/furnihub?retryWrites=true&w=majority
-JWT_SECRET=your_jwt_secret_key
+JWT_SECRET=a_long_random_string_of_at_least_16_chars
 PORT=5000
 CLIENT_URL=http://localhost:5173
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 GEMINI_API_KEY=your_gemini_api_key
+# Payment is simulated (demo mode); these are placeholders only
+STRIPE_SECRET_KEY=sk_test_placeholder
+STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
 ```
 
-Seed the database with sample products:
+`MONGODB_URI` and `JWT_SECRET` are required — the server refuses to start without them.
+
+Seed the database:
 
 ```bash
-node seed.js
+npm run seed
 ```
 
-Start the backend server:
+Start the backend:
 
 ```bash
 npm run dev
@@ -131,6 +120,8 @@ npm install
 npm run dev
 ```
 
+Optional: copy `frontend/.env.example` to `frontend/.env` to point the app at a different API (defaults to `http://localhost:5000/api`).
+
 ### 4. Open in browser
 
 ```
@@ -139,18 +130,75 @@ http://localhost:5173
 
 ---
 
-## 🔐 Admin Access
+## 🔑 Admin Access
 
-Admin access is granted via npm run make-admin -- <email>.Navigate to `/admin/dashboard` after logging in.
+Public signup always creates a normal `user`. To create an admin, sign up first, then promote the account from the `backend/` folder:
+
+```bash
+npm run make-admin -- you@example.com
+```
+
+Log in again and open `/admin/dashboard`.
+
+## 💳 Payments (demo mode)
+
+Stripe does not support every country, so card payments are **simulated**: the backend returns a fake payment intent and no real charge is made. Use test card `4242 4242 4242 4242`, any future expiry and any CVC. Cash on Delivery works normally. Real payment-provider verification is not implemented.
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint                  | Access      | Description              |
+|--------|---------------------------|-------------|--------------------------|
+| POST   | /api/auth/signup          | Public      | Register new user        |
+| POST   | /api/auth/login           | Public      | Login, returns JWT       |
+| GET    | /api/auth/me              | Protected   | Get current user         |
+| GET    | /api/products             | Public      | List products            |
+| GET    | /api/products/:id         | Public      | Get single product       |
+| POST   | /api/products             | Admin       | Create product           |
+| PUT    | /api/products/:id         | Admin       | Update product           |
+| DELETE | /api/products/:id         | Admin       | Delete product           |
+| POST   | /api/orders               | Protected   | Place order              |
+| GET    | /api/orders/my            | Protected   | Get my orders            |
+| GET    | /api/orders               | Admin       | Get all orders           |
+| GET    | /api/orders/stats         | Admin       | Dashboard stats          |
+| PUT    | /api/orders/:id/status    | Admin       | Update order status      |
+| POST   | /api/upload               | Admin       | Upload product image     |
+| POST   | /api/analyze              | Public      | AI room analysis         |
+| POST   | /api/payment/create-intent| Protected   | Simulated payment intent |
+
+---
+
+## 🌐 Environment Variables Summary
+
+| Variable                 | Where       | Description                      |
+|--------------------------|-------------|----------------------------------|
+| `MONGODB_URI`            | Backend     | MongoDB Atlas connection string  |
+| `JWT_SECRET`             | Backend     | Secret key for JWT signing       |
+| `PORT`                   | Backend     | Server port (default 5000)       |
+| `CLIENT_URL`             | Backend     | Frontend URL for CORS            |
+| `CLOUDINARY_CLOUD_NAME`  | Backend     | Cloudinary cloud name            |
+| `CLOUDINARY_API_KEY`     | Backend     | Cloudinary API key               |
+| `CLOUDINARY_API_SECRET`  | Backend     | Cloudinary API secret            |
+| `GEMINI_API_KEY`         | Backend     | Google Gemini Vision API key     |
+| `NODE_ENV`               | Backend     | Set `production` to hide error details |
+| `VITE_API_URL`           | Frontend    | API base URL incl. `/api` (default `http://localhost:5000/api`) |
 
 ---
 
 ## 📸 Screenshots
 
-> Add screenshots here
+> Add screenshots here after deployment.
+
+---
+
+## 👩‍💻 Author
+
+**Nethmi Rajapaksha** — [@Nnavodya](https://github.com/Nnavodya)  
+Software Engineering Undergraduate, University of Kelaniya, Sri Lanka
 
 ---
 
 ## 📄 License
 
-This project is for educational and portfolio purposes.
+MIT License
