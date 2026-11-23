@@ -7,6 +7,7 @@ export const useCart = () => useContext(CartContext)
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([])
+  const [couponCode, setCouponCode] = useState(() => localStorage.getItem('furnihub_coupon') || '')
   const [cartMessage, setCartMessage] = useState('')
   const lastAddedRef = useRef({ id: null, at: 0 })
 
@@ -22,10 +23,18 @@ export const CartProvider = ({ children }) => {
     }
   }, [])
 
-  // ── Persist cart to localStorage whenever it changes ──
+  // ── Persist cart & coupon to localStorage whenever they change ──
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems))
   }, [cartItems])
+
+  useEffect(() => {
+    if (couponCode) {
+      localStorage.setItem('furnihub_coupon', couponCode)
+    } else {
+      localStorage.removeItem('furnihub_coupon')
+    }
+  }, [couponCode])
 
   // ── Derived cart count (sum of all qty) — used by Header badge ──
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
@@ -106,13 +115,21 @@ export const CartProvider = ({ children }) => {
     }
   }
 
-  const clearCart = () => setCartItems([])
+  const clearCoupon = () => setCouponCode('')
+
+  const clearCart = () => {
+    setCartItems([])
+    setCouponCode('')
+  }
 
   return (
     <CartContext.Provider value={{
       cartItems,
       cartCount,
       cartMessage,
+      couponCode,
+      setCouponCode,
+      clearCoupon,
       addToCart,
       removeFromCart,
       updateQty,

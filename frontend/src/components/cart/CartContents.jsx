@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   TbTrash, TbPlus, TbMinus, TbShoppingCart,
   TbArrowRight, TbTag, TbTruck, TbShieldCheck
 } from 'react-icons/tb'
+import { useCart } from '../../context/CartContext'
+import api from '../../api/axios'
 
 const C = {
   bg:           '#FAF7F4',
@@ -114,33 +116,85 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => (
 
 // ── Order Summary Panel ────────────────────────────────
 const OrderSummary = ({ items }) => {
-  const [coupon,      setCoupon]     = useState('')
-  const [discount,    setDiscount]   = useState(0)
+  const { couponCode, setCouponCode, clearCoupon } = useCart()
+  const [coupon,      setCoupon]     = useState(couponCode || '')
+  const [discountPct, setDiscountPct] = useState(0)
+  const [discountAmt, setDiscountAmt] = useState(0)
   const [couponMsg,   setCouponMsg]  = useState('')
   const [couponColor, setCouponColor] = useState('')
+  const [applying,    setApplying]   = useState(false)
 
-  const subtotal    = items.reduce((sum, i) => sum + i.price * i.qty, 0)
-  const discountAmt = Math.round(subtotal * discount / 100)
-  const shipping    = subtotal - discountAmt >= 100 ? 0 : 25
-  const total       = subtotal - discountAmt + shipping
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0)
+  const shipping = subtotal - discountAmt >= 100 ? 0 : 25
+  const total    = subtotal - discountAmt + shipping
 
   // Free shipping progress
   const progress = Math.min(((subtotal - discountAmt) / 100) * 100, 100)
 
-  const applyCoupon = () => {
-    if (coupon.toUpperCase() === 'FURNI20') {
-      setDiscount(20)
-      setCouponMsg('✓ 20% discount applied!')
-      setCouponColor('#2E7D32')
-    } else if (coupon.toUpperCase() === 'WELCOME10') {
-      setDiscount(10)
-      setCouponMsg('✓ 10% discount applied!')
-      setCouponColor('#2E7D32')
-    } else {
-      setDiscount(0)
-      setCouponMsg('✗ Invalid coupon code.')
-      setCouponColor('#E53935')
+  // Keep discount synced with backend whenever cart items or persisted couponCode change
+  useEffect(() => {
+    let active = true
+    if (!couponCode || items.length === 0) {
+      return () => { active = false }
     }
+    api.post('/orders/validate-coupon', {
+      code: couponCode,
+      items: items.map(i => ({ product: i.id, qty: i.qty })),
+    })
+      .then(({ data }) => {
+        if (!active) return
+        setDiscountPct(data.discountPercent)
+        setDiscountAmt(data.discountAmount)
+        setCouponMsg(`✓ ${data.discountPercent}% discount (${data.code}) applied!`)
+        setCouponColor('#2E7D32')
+      })
+      .catch(() => {
+        if (!active) return
+        clearCoupon()
+        setDiscountPct(0)
+        setDiscountAmt(0)
+      })
+    return () => { active = false }
+  }, [couponCode, items, clearCoupon])
+
+  const applyCoupon = async () => {
+    const trimmed = coupon.trim()
+    if (!trimmed) {
+      clearCoupon()
+      setDiscountPct(0)
+      setDiscountAmt(0)
+      setCouponMsg('')
+      return
+    }
+    setApplying(true)
+    try {
+      const { data } = await api.post('/orders/validate-coupon', {
+        code: trimmed,
+        items: items.map(i => ({ product: i.id, qty: i.qty })),
+      })
+      setCouponCode(data.code)
+      setCoupon(data.code)
+      setDiscountPct(data.discountPercent)
+      setDiscountAmt(data.discountAmount)
+      setCouponMsg(`✓ ${data.discountPercent}% discount (${data.code}) applied!`)
+      setCouponColor('#2E7D32')
+    } catch (err) {
+      clearCoupon()
+      setDiscountPct(0)
+      setDiscountAmt(0)
+      setCouponMsg(`✗ ${err.response?.data?.message || 'Invalid coupon code.'}`)
+      setCouponColor('#E53935')
+    } finally {
+      setApplying(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    clearCoupon()
+    setCoupon('')
+    setDiscountPct(0)
+    setDiscountAmt(0)
+    setCouponMsg('')
   }
 
   return (
@@ -206,13 +260,24 @@ const OrderSummary = ({ items }) => {
           />
           <button
             onClick={applyCoupon}
+            disabled={applying}
             className="text-xs font-semibold px-2 py-1 rounded transition-all"
-            style={{ color: C.accent }}
+            style={{ color: C.accent, opacity: applying ? 0.6 : 1 }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(139,94,46,0.15)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            Apply
+            {applying ? '…' : 'Apply'}
           </button>
+          {couponCode && (
+            <button
+              type="button"
+              onClick={handleRemoveCoupon}
+              className="text-[11px] font-medium px-1.5 py-0.5 rounded"
+              style={{ color: '#E53935' }}
+            >
+              Remove
+            </button>
+          )}
         </div>
         {couponMsg && (
           <p className="text-xs px-1 mt-1" style={{ color: couponColor }}>
@@ -227,9 +292,9 @@ const OrderSummary = ({ items }) => {
           <span>Subtotal ({items.reduce((s, i) => s + i.qty, 0)} items)</span>
           <span>${subtotal.toLocaleString()}</span>
         </div>
-        {discount > 0 && (
+        {discountPct > 0 && (
           <div className="flex justify-between text-sm" style={{ color: '#2E7D32' }}>
-            <span>Discount ({discount}%)</span>
+            <span>Discount ({discountPct}%)</span>
             <span>−${discountAmt.toLocaleString()}</span>
           </div>
         )}

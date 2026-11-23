@@ -1,8 +1,8 @@
-import { useState, useRef, Fragment } from 'react'
+import { useState, useRef, useEffect, Fragment } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import {
   TbTruck, TbCreditCard, TbCheck, TbChevronLeft,
-  TbLock, TbMapPin, TbArrowRight, TbCircleCheck,
+  TbLock, TbMapPin, TbArrowRight, TbCircleCheck, TbTag,
 } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -80,9 +80,25 @@ const Field = ({ label, ...props }) => (
 )
 
 // ── Order summary sidebar ───────────────────────────────
-const OrderSummary = ({ cartItems, shippingCost, buttonLabel, onButtonClick, buttonDisabled }) => {
+const OrderSummary = ({
+  cartItems,
+  couponCode,
+  discountAmt,
+  discountPct,
+  shippingCost,
+  couponInput,
+  setCouponInput,
+  couponMsg,
+  couponError,
+  applyingCoupon,
+  onApplyCoupon,
+  onRemoveCoupon,
+  buttonLabel,
+  onButtonClick,
+  buttonDisabled,
+}) => {
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0)
-  const total     = subtotal + shippingCost
+  const total    = subtotal - discountAmt + shippingCost
 
   return (
     <div
@@ -111,11 +127,60 @@ const OrderSummary = ({ cartItems, shippingCost, buttonLabel, onButtonClick, but
         ))}
       </div>
 
+      {/* Coupon input */}
+      <div className="mb-4 pt-3" style={{ borderTop: `1px solid ${C.divider}` }}>
+        <div
+          className="flex items-center gap-2 px-3 py-2 rounded-lg"
+          style={{ border: `1px solid ${C.accentBorder}`, background: C.accentLight }}
+        >
+          <TbTag className="h-4 w-4 shrink-0" style={{ color: C.accent }} />
+          <input
+            type="text"
+            placeholder="Coupon code (FURNI20)"
+            value={couponInput}
+            onChange={e => setCouponInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), onApplyCoupon())}
+            className="bg-transparent border-none outline-none text-xs flex-1"
+            style={{ color: C.text }}
+          />
+          <button
+            type="button"
+            onClick={onApplyCoupon}
+            disabled={applyingCoupon}
+            className="text-xs font-semibold px-2 py-0.5 rounded"
+            style={{ color: C.accent, opacity: applyingCoupon ? 0.6 : 1 }}
+          >
+            {applyingCoupon ? '…' : 'Apply'}
+          </button>
+          {couponCode && (
+            <button
+              type="button"
+              onClick={onRemoveCoupon}
+              className="text-[11px] font-medium px-1"
+              style={{ color: '#E53935' }}
+            >
+              Remove
+            </button>
+          )}
+        </div>
+        {(couponError || couponMsg) && (
+          <p className="text-xs px-1 mt-1" style={{ color: couponError ? '#E53935' : '#2E7D32' }}>
+            {couponError || couponMsg}
+          </p>
+        )}
+      </div>
+
       <div className="flex flex-col gap-2 mb-4 pt-3" style={{ borderTop: `1px solid ${C.divider}` }}>
         <div className="flex justify-between text-sm" style={{ color: C.textMuted }}>
           <span>Subtotal</span>
           <span>${subtotal.toLocaleString()}</span>
         </div>
+        {discountAmt > 0 && (
+          <div className="flex justify-between text-sm" style={{ color: '#2E7D32' }}>
+            <span>Discount ({couponCode} · {discountPct}%)</span>
+            <span>−${discountAmt.toLocaleString()}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm" style={{ color: C.textMuted }}>
           <span>Shipping</span>
           <span style={{ color: shippingCost === 0 ? '#2E7D32' : C.textMuted }}>
@@ -156,7 +221,7 @@ const OrderSummary = ({ cartItems, shippingCost, buttonLabel, onButtonClick, but
 
 // ── Main Checkout component ─────────────────────────────
 const Checkout = () => {
-  const { cartItems, clearCart } = useCart()
+  const { cartItems, clearCart, couponCode, setCouponCode, clearCoupon } = useCart()
   const { isAuthenticated, loading: authLoading } = useAuth()
 
   const [step, setStep] = useState('shipping')
@@ -165,6 +230,12 @@ const Checkout = () => {
   const [orderNumber, setOrderNumber] = useState('')
   const [emailSent, setEmailSent] = useState(false)
   const [error, setError] = useState('')
+  const [couponInput, setCouponInput]       = useState(couponCode || '')
+  const [discountPct, setDiscountPct]       = useState(0)
+  const [discountAmt, setDiscountAmt]       = useState(0)
+  const [couponMsg, setCouponMsg]           = useState('')
+  const [couponError, setCouponError]       = useState('')
+  const [applyingCoupon, setApplyingCoupon] = useState(false)
   const idempotencyKeyRef = useRef(null)
 
   const [shipping, setShipping] = useState({
@@ -176,8 +247,75 @@ const Checkout = () => {
     method: 'cod', cardNumber: '', expiry: '', cvc: '', nameOnCard: '',
   })
 
+  useEffect(() => {
+    let active = true
+    if (!couponCode || cartItems.length === 0) {
+      return () => { active = false }
+    }
+    api.post('/orders/validate-coupon', {
+      code: couponCode,
+      items: cartItems.map(i => ({ product: i.id, qty: i.qty })),
+    })
+      .then(({ data }) => {
+        if (!active) return
+        setDiscountPct(data.discountPercent)
+        setDiscountAmt(data.discountAmount)
+        setCouponMsg(`✓ ${data.discountPercent}% discount (${data.code}) applied`)
+        setCouponError('')
+      })
+      .catch(() => {
+        if (!active) return
+        clearCoupon()
+        setDiscountPct(0)
+        setDiscountAmt(0)
+      })
+    return () => { active = false }
+  }, [couponCode, cartItems, clearCoupon])
+
+  const handleApplyCoupon = async () => {
+    const trimmed = couponInput.trim()
+    if (!trimmed) {
+      clearCoupon()
+      setDiscountPct(0)
+      setDiscountAmt(0)
+      setCouponMsg('')
+      setCouponError('')
+      return
+    }
+    setApplyingCoupon(true)
+    setCouponError('')
+    try {
+      const { data } = await api.post('/orders/validate-coupon', {
+        code: trimmed,
+        items: cartItems.map(i => ({ product: i.id, qty: i.qty })),
+      })
+      setCouponCode(data.code)
+      setCouponInput(data.code)
+      setDiscountPct(data.discountPercent)
+      setDiscountAmt(data.discountAmount)
+      setCouponMsg(`✓ ${data.discountPercent}% discount (${data.code}) applied`)
+    } catch (err) {
+      clearCoupon()
+      setDiscountPct(0)
+      setDiscountAmt(0)
+      setCouponMsg('')
+      setCouponError(err.response?.data?.message || 'Invalid coupon code.')
+    } finally {
+      setApplyingCoupon(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    clearCoupon()
+    setCouponInput('')
+    setDiscountPct(0)
+    setDiscountAmt(0)
+    setCouponMsg('')
+    setCouponError('')
+  }
+
   const subtotal     = cartItems.reduce((s, i) => s + i.price * i.qty, 0)
-  const shippingCost = subtotal >= 100 ? 0 : 25
+  const shippingCost = subtotal - discountAmt >= 100 ? 0 : 25
 
   if (authLoading) {
     return (
@@ -271,6 +409,7 @@ const Checkout = () => {
         })),
         shippingAddress: shipping,
         paymentMethod:   'cod',
+        ...(couponCode ? { couponCode } : {}),
         idempotencyKey:  idempotencyKeyRef.current,
       })
       setOrderNumber(data._id.toString().slice(-6).toUpperCase())
@@ -524,7 +663,17 @@ const Checkout = () => {
           <div>
             <OrderSummary
               cartItems={cartItems}
+              couponCode={couponCode}
+              discountAmt={discountAmt}
+              discountPct={discountPct}
               shippingCost={shippingCost}
+              couponInput={couponInput}
+              setCouponInput={setCouponInput}
+              couponMsg={couponMsg}
+              couponError={couponError}
+              applyingCoupon={applyingCoupon}
+              onApplyCoupon={handleApplyCoupon}
+              onRemoveCoupon={handleRemoveCoupon}
               buttonLabel={
                 step === 'shipping' ? 'Continue to Payment' :
                 step === 'payment'  ? 'Review Order' :

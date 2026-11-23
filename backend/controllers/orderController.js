@@ -3,6 +3,7 @@ const Order = require('../models/Order')
 const Product = require('../models/Product')
 const User = require('../models/User')
 const sendEmail = require('../utils/sendEmail')
+const { validateAndCalcCoupon } = require('../config/coupons')
 
 const VALID_ORDER_STATUSES = Order.schema.path('status').enumValues
 
@@ -48,6 +49,9 @@ const sendOrderConfirmationEmail = async (order, fallbackEmail) => {
         linesText,
         '',
         `Subtotal: $${order.subtotal.toLocaleString()}`,
+        ...(order.discountAmount > 0
+          ? [`Discount${order.couponCode ? ` (${order.couponCode})` : ''}: -$${order.discountAmount.toLocaleString()}`]
+          : []),
         `Shipping: ${order.shippingCost === 0 ? 'Free' : `$${order.shippingCost}`}`,
         `Total: $${order.total.toLocaleString()}`,
         `Payment Method: Cash on Delivery (Payment Status: ${order.paymentStatus})`,
@@ -60,6 +64,7 @@ const sendOrderConfirmationEmail = async (order, fallbackEmail) => {
           <p>Hi ${addr.fullName || 'Customer'}, thank you for shopping with FurniHub!</p>
           <ul>${(order.items || []).map(i => `<li>${i.name} &times; ${i.qty} — <strong>$${(i.price * i.qty).toLocaleString()}</strong></li>`).join('')}</ul>
           <p><strong>Subtotal:</strong> $${order.subtotal.toLocaleString()}<br/>
+          ${order.discountAmount > 0 ? `<strong>Discount${order.couponCode ? ` (${order.couponCode})` : ''}:</strong> -$${order.discountAmount.toLocaleString()}<br/>` : ''}
           <strong>Shipping:</strong> ${order.shippingCost === 0 ? 'Free' : `$${order.shippingCost}`}<br/>
           <strong>Total:</strong> $${order.total.toLocaleString()}</p>
           <p><strong>Payment Method:</strong> Cash on Delivery (${order.paymentStatus})</p>
@@ -96,6 +101,12 @@ const createOrder = async (req, res) => {
     }
     if (paymentMethod !== 'cod') {
       return res.status(400).json({ message: 'Invalid payment method' })
+    }
+
+    // Pre-validate coupon syntax/existence before modifying stock
+    const preCoupon = validateAndCalcCoupon(req.body.couponCode, 0)
+    if (preCoupon.error) {
+      return res.status(400).json({ message: preCoupon.error })
     }
 
     // Idempotency check: return existing order without re-decrementing stock or re-sending email
@@ -162,9 +173,11 @@ const createOrder = async (req, res) => {
       emoji:   p.emoji || '🪑',
     }))
 
-    const subtotal     = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0)
-    const shippingCost = calcShipping(subtotal)
-    const total        = subtotal + shippingCost
+    const subtotal       = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0)
+    const couponResult   = validateAndCalcCoupon(req.body.couponCode, subtotal)
+    const discountAmount = couponResult.discountAmount
+    const shippingCost   = calcShipping(subtotal - discountAmount)
+    const total          = subtotal - discountAmount + shippingCost
 
     const order = await Order.create({
       user: req.user._id,
@@ -174,6 +187,8 @@ const createOrder = async (req, res) => {
       paymentStatus: 'pending',
       ...(idempotencyKey ? { idempotencyKey } : {}),
       subtotal,
+      couponCode: couponResult.couponCode,
+      discountAmount,
       shippingCost,
       total,
     })
@@ -297,4 +312,45 @@ const getDashboardStats = async (req, res) => {
   }
 }
 
-module.exports = { createOrder, getMyOrders, getAllOrders, updateOrderStatus, getDashboardStats }
+// ── POST /api/orders/validate-coupon — validate coupon & calculate preview discount ──
+const validateCoupon = async (req, res) => {
+  try {
+    const { code, items } = req.body
+    if (!code || typeof code !== 'string' || !code.trim()) {
+      return res.status(400).json({ message: 'Coupon code is required' })
+    }
+
+    let subtotal = 0
+    if (Array.isArray(items) && items.length > 0) {
+      const validIds = items
+        .filter(i => i && i.product && mongoose.Types.ObjectId.isValid(i.product))
+        .map(i => String(i.product))
+      if (validIds.length > 0) {
+        const products = await Product.find({ _id: { $in: validIds } }).select('price')
+        const priceById = new Map(products.map(p => [String(p._id), p.price]))
+        subtotal = items.reduce((sum, i) => {
+          const p = priceById.get(String(i.product))
+          const q = Number(i.qty)
+          return p && Number.isInteger(q) && q > 0 ? sum + p * q : sum
+        }, 0)
+      }
+    }
+
+    const result = validateAndCalcCoupon(code, subtotal)
+    if (result.error) {
+      return res.status(400).json({ message: result.error })
+    }
+
+    res.json({
+      valid:           true,
+      code:            result.couponCode,
+      discountPercent: result.discountPercent,
+      discountAmount:  result.discountAmount,
+      subtotal,
+    })
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to validate coupon' })
+  }
+}
+
+module.exports = { createOrder, getMyOrders, getAllOrders, updateOrderStatus, getDashboardStats, validateCoupon }

@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
 const {
-  createOrder, getMyOrders, getAllOrders, updateOrderStatus, getDashboardStats,
+  createOrder, getMyOrders, getAllOrders, updateOrderStatus, getDashboardStats, validateCoupon,
 } = require('../controllers/orderController')
 const { protect, adminOnly } = require('../middleware/auth')
+
+// ── Public coupon preview validation (authoritative check still runs in createOrder) ──
+router.post('/validate-coupon', validateCoupon)
 
 // ── Logged-in user ──
 router.post('/', protect, createOrder)
