@@ -1,13 +1,44 @@
+const mongoose = require('mongoose')
 const Product = require('../models/Product')
 
-// ── GET /api/products — public, supports ?category= search ──
+const ALLOWED_PRODUCT_FIELDS = [
+  'name',
+  'category',
+  'price',
+  'oldPrice',
+  'badge',
+  'emoji',
+  'description',
+  'colors',
+  'inStock',
+  'sku',
+  'imageUrl',
+]
+
+const escapeRegex = (str) => String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const pickProductFields = (body = {}) => {
+  const data = {}
+  for (const field of ALLOWED_PRODUCT_FIELDS) {
+    if (body[field] !== undefined) {
+      data[field] = body[field]
+    }
+  }
+  return data
+}
+
+// ── GET /api/products — public, supports ?category= & ?search= ──
 const getProducts = async (req, res) => {
   try {
     const { category, search } = req.query
     const filter = {}
 
-    if (category) filter.category = category
-    if (search) filter.name = { $regex: search, $options: 'i' }
+    if (typeof category === 'string' && category.trim()) {
+      filter.category = category.trim()
+    }
+    if (typeof search === 'string' && search.trim()) {
+      filter.name = { $regex: escapeRegex(search.trim()), $options: 'i' }
+    }
 
     const products = await Product.find(filter).sort({ createdAt: -1 })
     res.json(products)
@@ -19,6 +50,9 @@ const getProducts = async (req, res) => {
 // ── GET /api/products/:id — public ──
 const getProductById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid product ID' })
+    }
     const product = await Product.findById(req.params.id)
     if (!product) {
       return res.status(404).json({ message: 'Product not found' })
@@ -32,7 +66,8 @@ const getProductById = async (req, res) => {
 // ── POST /api/products — admin only ──
 const createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body)
+    const payload = pickProductFields(req.body)
+    const product = await Product.create(payload)
     res.status(201).json(product)
   } catch (err) {
     res.status(400).json({ message: 'Failed to create product', error: err.message })
@@ -42,7 +77,11 @@ const createProduct = async (req, res) => {
 // ── PUT /api/products/:id — admin only ──
 const updateProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid product ID' })
+    }
+    const payload = pickProductFields(req.body)
+    const product = await Product.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true,
     })
@@ -58,6 +97,9 @@ const updateProduct = async (req, res) => {
 // ── DELETE /api/products/:id — admin only ──
 const deleteProduct = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid product ID' })
+    }
     const product = await Product.findByIdAndDelete(req.params.id)
     if (!product) {
       return res.status(404).json({ message: 'Product not found' })

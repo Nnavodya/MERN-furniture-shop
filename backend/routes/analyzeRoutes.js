@@ -2,12 +2,28 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer')
 const { GoogleGenerativeAI } = require('@google/generative-ai')
+const { protect } = require('../middleware/auth')
+const { MAX_IMAGE_SIZE_BYTES, imageFileFilter } = require('../config/cloudinary')
 
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_IMAGE_SIZE_BYTES },
+  fileFilter: imageFileFilter,
+})
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
-// ── POST /api/analyze — analyze room photo, suggest furniture categories ──
-router.post('/', upload.single('image'), async (req, res) => {
+const handleAnalyzeUpload = (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (!err) return next()
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'Image must be 5 MB or smaller' })
+    }
+    return res.status(err.statusCode || 400).json({ message: err.message || 'Invalid image upload' })
+  })
+}
+
+// ── POST /api/analyze — authenticated user analyzes room photo ──
+router.post('/', protect, handleAnalyzeUpload, async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No image provided' })
   }
