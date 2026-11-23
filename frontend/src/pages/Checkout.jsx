@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, useRef, Fragment } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import {
   TbTruck, TbCreditCard, TbCheck, TbChevronLeft,
@@ -19,13 +19,6 @@ const C = {
   divider:      'rgba(139,94,46,0.12)',
 }
 
-// ── Card input helpers (demo / simulated payment) ───────
-const formatCard   = v => v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
-const formatExpiry = v => {
-  const d = v.replace(/\D/g, '').slice(0, 4)
-  return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d
-}
-
 const steps = [
   { key: 'shipping', label: 'Shipping',  icon: TbTruck      },
   { key: 'payment',  label: 'Payment',   icon: TbCreditCard },
@@ -41,7 +34,7 @@ const StepIndicator = ({ current }) => {
         const done   = i < currentIdx
         const active = i === currentIdx
         return (
-          <React.Fragment key={step.key}>
+          <Fragment key={step.key}>
             <div className="flex items-center gap-2">
               <div
                 className="flex items-center justify-center rounded-full shrink-0 transition-all"
@@ -67,7 +60,7 @@ const StepIndicator = ({ current }) => {
                 style={{ background: done ? C.accent : C.divider }}
               />
             )}
-          </React.Fragment>
+          </Fragment>
         )
       })}
     </div>
@@ -170,7 +163,9 @@ const Checkout = () => {
   const [placing, setPlacing] = useState(false)
   const [placed, setPlaced]   = useState(false)
   const [orderNumber, setOrderNumber] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
   const [error, setError] = useState('')
+  const idempotencyKeyRef = useRef(null)
 
   const [shipping, setShipping] = useState({
     fullName: '', email: '', phone: '',
@@ -178,7 +173,7 @@ const Checkout = () => {
   })
 
   const [payment, setPayment] = useState({
-    method: 'card', cardNumber: '', expiry: '', cvc: '', nameOnCard: '',
+    method: 'cod', cardNumber: '', expiry: '', cvc: '', nameOnCard: '',
   })
 
   const subtotal     = cartItems.reduce((s, i) => s + i.price * i.qty, 0)
@@ -237,7 +232,9 @@ const Checkout = () => {
             Your order <span style={{ color: C.accent, fontWeight: 700 }}>#{orderNumber}</span> has been confirmed.
           </p>
           <p className="text-sm mb-8" style={{ color: C.textMuted }}>
-            A confirmation email has been sent to {shipping.email || 'your inbox'}.
+            {emailSent
+              ? `A confirmation email has been sent to ${shipping.email || 'your inbox'}.`
+              : 'Your order is confirmed. You can track it anytime in My Orders.'}
           </p>
           <Link
             to="/products"
@@ -252,21 +249,18 @@ const Checkout = () => {
   }
 
   const shippingValid = shipping.fullName && shipping.email && shipping.address && shipping.city && shipping.postalCode
-  const cardDigits    = payment.cardNumber.replace(/\D/g, '')
-  const paymentValid  = payment.method === 'cod' ||
-    (cardDigits.length === 16 && /^\d{2}\/\d{2}$/.test(payment.expiry) && payment.cvc.length >= 3 && payment.nameOnCard.trim())
+  const paymentValid  = payment.method === 'cod'
 
   const handlePlaceOrder = async () => {
+    if (placing) return
+    if (!idempotencyKeyRef.current) {
+      idempotencyKeyRef.current = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    }
     setError('')
     setPlacing(true)
     try {
-      let paymentIntentId = null
-      if (payment.method === 'card') {
-        // SIMULATED: backend returns a fake client secret (no real charge is made)
-        const { data: intent } = await api.post('/payment/create-intent', { amount: subtotal + shippingCost })
-        paymentIntentId = intent.clientSecret.split('_secret_')[0]
-      }
-
       const { data } = await api.post('/orders', {
         items: cartItems.map(i => ({
           product:  i.id,
@@ -276,13 +270,11 @@ const Checkout = () => {
           emoji:    i.emoji || '🪑',
         })),
         shippingAddress: shipping,
-        paymentMethod:   payment.method,
-        paymentIntentId,
-        subtotal,
-        shippingCost,
-        total: subtotal + shippingCost,
+        paymentMethod:   'cod',
+        idempotencyKey:  idempotencyKeyRef.current,
       })
       setOrderNumber(data._id.toString().slice(-6).toUpperCase())
+      setEmailSent(Boolean(data.confirmationEmailSent))
       setPlaced(true)
       clearCart()
     } catch (err) {
@@ -403,72 +395,47 @@ const Checkout = () => {
 
                 {/* Method selector */}
                 <div className="flex gap-3 mb-5">
-                  {[
-                    { key: 'card', label: 'Credit / Debit Card' },
-                    { key: 'cod',  label: 'Cash on Delivery'    },
-                  ].map(m => (
-                    <button
-                      key={m.key}
-                      onClick={() => setPayment({ ...payment, method: m.key })}
-                      className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all"
-                      style={{
-                        background: payment.method === m.key ? C.accent : C.accentLight,
-                        color: payment.method === m.key ? '#FFFFFF' : C.text,
-                        border: `1px solid ${payment.method === m.key ? C.accent : C.accentBorder}`,
-                      }}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setPayment({ ...payment, method: 'cod' })}
+                    className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all"
+                    style={{
+                      background: C.accent,
+                      color: '#FFFFFF',
+                      border: `1px solid ${C.accent}`,
+                    }}
+                  >
+                    Cash on Delivery
+                  </button>
+                  <button
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    className="flex-1 py-2.5 px-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                    style={{
+                      background: C.divider,
+                      color: C.textMuted,
+                      border: `1px solid ${C.divider}`,
+                      cursor: 'not-allowed',
+                      opacity: 0.75,
+                    }}
+                  >
+                    Credit / Debit Card
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(44,26,14,0.1)', color: C.textMuted }}>
+                      Currently Unavailable
+                    </span>
+                  </button>
                 </div>
 
-                {payment.method === 'card' ? (
-                  <>
-                    <div
-                      className="mb-4 p-3 rounded-lg text-xs"
-                      style={{ background: C.accentLight, color: C.textMuted, border: `1px solid ${C.accentBorder}` }}
-                    >
-                      🧪 Demo mode — payments are simulated and no real charge is made. Use test card
-                      <strong style={{ color: C.text }}> 4242 4242 4242 4242</strong>, any future expiry, any CVC.
-                    </div>
-                    <div className="mb-4">
-                      <Field
-                        label="Name on Card" placeholder="Nethmi Rajapaksha"
-                        value={payment.nameOnCard}
-                        onChange={e => setPayment({ ...payment, nameOnCard: e.target.value })}
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <Field
-                        label="Card Number" placeholder="1234 5678 9012 3456" maxLength={19}
-                        value={payment.cardNumber}
-                        inputMode="numeric"
-                        onChange={e => setPayment({ ...payment, cardNumber: formatCard(e.target.value) })}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <Field
-                        label="Expiry Date" placeholder="MM/YY" maxLength={5}
-                        value={payment.expiry}
-                        inputMode="numeric"
-                        onChange={e => setPayment({ ...payment, expiry: formatExpiry(e.target.value) })}
-                      />
-                      <Field
-                        label="CVC" placeholder="123" maxLength={4}
-                        value={payment.cvc}
-                        inputMode="numeric"
-                        onChange={e => setPayment({ ...payment, cvc: e.target.value.replace(/\D/g, '') })}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div
-                    className="mb-6 p-4 rounded-lg text-sm"
-                    style={{ background: C.accentLight, color: C.textMuted, border: `1px solid ${C.accentBorder}` }}
-                  >
-                    You'll pay in cash when your order is delivered. Please have the exact amount ready.
-                  </div>
-                )}
+                <div
+                  className="mb-6 p-4 rounded-lg text-sm"
+                  style={{ background: C.accentLight, color: C.textMuted, border: `1px solid ${C.accentBorder}` }}
+                >
+                  You'll pay in cash when your order is delivered. Please have the exact amount ready.
+                  <span className="block text-xs mt-2">
+                    Card payments are currently unavailable.
+                  </span>
+                </div>
 
                 <div className="flex gap-3">
                   <button

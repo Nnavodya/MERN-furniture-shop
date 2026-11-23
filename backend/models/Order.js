@@ -34,7 +34,21 @@ const orderSchema = new mongoose.Schema(
       enum: ['card', 'cod'],
       required: true,
     },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
+    },
+    paidAt: Date,
     paymentIntentId: String,
+    idempotencyKey: {
+      type: String,
+      trim: true,
+    },
+    confirmationEmailSent: {
+      type: Boolean,
+      default: false,
+    },
     subtotal:     { type: Number, required: true },
     shippingCost: { type: Number, required: true, default: 0 },
     total:        { type: Number, required: true },
@@ -50,5 +64,7 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
+
+orderSchema.index({ user: 1, idempotencyKey: 1 }, { unique: true, sparse: true })
 
 module.exports = mongoose.model('Order', orderSchema)

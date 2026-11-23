@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Order = require('../models/Order')
 const Product = require('../models/Product')
 const User = require('../models/User')
+const sendEmail = require('../utils/sendEmail')
 
 const VALID_ORDER_STATUSES = Order.schema.path('status').enumValues
 
@@ -22,18 +23,87 @@ const restoreOrderStock = async (entries) => {
   }
 }
 
+// Helper: send order confirmation email once (non-blocking; never throws)
+const sendOrderConfirmationEmail = async (order, fallbackEmail) => {
+  if (!order || order.confirmationEmailSent) return false
+  const recipient = order.shippingAddress?.email || fallbackEmail
+  if (!recipient) return false
+
+  const orderRef = String(order._id).slice(-6).toUpperCase()
+  const linesText = (order.items || [])
+    .map(i => `- ${i.name} x${i.qty}: $${(i.price * i.qty).toLocaleString()}`)
+    .join('\n')
+  const addr = order.shippingAddress || {}
+
+  try {
+    await sendEmail({
+      to: recipient,
+      subject: `FurniHub Order Confirmation #${orderRef}`,
+      text: [
+        `Hi ${addr.fullName || 'Customer'},`,
+        '',
+        `Thank you for your order #${orderRef}!`,
+        '',
+        'Items:',
+        linesText,
+        '',
+        `Subtotal: $${order.subtotal.toLocaleString()}`,
+        `Shipping: ${order.shippingCost === 0 ? 'Free' : `$${order.shippingCost}`}`,
+        `Total: $${order.total.toLocaleString()}`,
+        `Payment Method: Cash on Delivery (Payment Status: ${order.paymentStatus})`,
+        '',
+        `Shipping Address: ${addr.address}, ${addr.city} ${addr.postalCode}, ${addr.country}`,
+      ].join('\n'),
+      html: `
+        <div style="font-family:sans-serif;color:#2C1A0E;max-width:560px">
+          <h2 style="color:#8B5E2E">Order Confirmed (#${orderRef})</h2>
+          <p>Hi ${addr.fullName || 'Customer'}, thank you for shopping with FurniHub!</p>
+          <ul>${(order.items || []).map(i => `<li>${i.name} &times; ${i.qty} — <strong>$${(i.price * i.qty).toLocaleString()}</strong></li>`).join('')}</ul>
+          <p><strong>Subtotal:</strong> $${order.subtotal.toLocaleString()}<br/>
+          <strong>Shipping:</strong> ${order.shippingCost === 0 ? 'Free' : `$${order.shippingCost}`}<br/>
+          <strong>Total:</strong> $${order.total.toLocaleString()}</p>
+          <p><strong>Payment Method:</strong> Cash on Delivery (${order.paymentStatus})</p>
+          <p><strong>Shipping Address:</strong> ${addr.address}, ${addr.city} ${addr.postalCode}, ${addr.country}</p>
+        </div>
+      `,
+    })
+    await Order.updateOne(
+      { _id: order._id, confirmationEmailSent: false },
+      { $set: { confirmationEmailSent: true } }
+    )
+    return true
+  } catch (mailErr) {
+    console.error('Order confirmation email failed:', mailErr.message)
+    return false
+  }
+}
+
 // ── POST /api/orders — logged-in user places an order ──
-// Prices, totals, and stock are ALWAYS recomputed/enforced from the database.
+// Prices, totals, paymentStatus, and stock are ALWAYS recomputed/enforced from the database.
 const createOrder = async (req, res) => {
   const decremented = []
+  const rawKey = req.headers['idempotency-key'] || req.body.idempotencyKey
+  const idempotencyKey = typeof rawKey === 'string' && rawKey.trim() ? rawKey.trim() : undefined
+
   try {
-    const { items, shippingAddress, paymentMethod, paymentIntentId } = req.body
+    const { items, shippingAddress, paymentMethod } = req.body
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: 'Order must contain at least one item' })
     }
-    if (!['card', 'cod'].includes(paymentMethod)) {
+    if (paymentMethod === 'card') {
+      return res.status(400).json({ message: 'Card payments are currently unavailable. Please select Cash on Delivery.' })
+    }
+    if (paymentMethod !== 'cod') {
       return res.status(400).json({ message: 'Invalid payment method' })
+    }
+
+    // Idempotency check: return existing order without re-decrementing stock or re-sending email
+    if (idempotencyKey) {
+      const existingOrder = await Order.findOne({ user: req.user._id, idempotencyKey })
+      if (existingOrder) {
+        return res.status(200).json(existingOrder)
+      }
     }
 
     // Merge duplicate lines and validate product IDs and quantities
@@ -100,17 +170,28 @@ const createOrder = async (req, res) => {
       user: req.user._id,
       items: orderItems,
       shippingAddress,
-      paymentMethod,
-      paymentIntentId: paymentMethod === 'card' ? paymentIntentId : undefined,
+      paymentMethod: 'cod',
+      paymentStatus: 'pending',
+      ...(idempotencyKey ? { idempotencyKey } : {}),
       subtotal,
       shippingCost,
       total,
     })
 
-    res.status(201).json(order)
+    const emailSent = await sendOrderConfirmationEmail(order, req.user.email)
+    const resultObj = typeof order.toObject === 'function' ? order.toObject() : { ...order }
+    resultObj.confirmationEmailSent = emailSent
+
+    res.status(201).json(resultObj)
   } catch (err) {
     if (decremented.length > 0) {
       await restoreOrderStock(decremented).catch(() => {})
+    }
+    if (err.code === 11000 && idempotencyKey) {
+      const existingOrder = await Order.findOne({ user: req.user._id, idempotencyKey }).catch(() => null)
+      if (existingOrder) {
+        return res.status(200).json(existingOrder)
+      }
     }
     res.status(400).json({ message: err.name === 'ValidationError' ? err.message : 'Failed to place order' })
   }
