@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import {
   TbTruck, TbCreditCard, TbCheck, TbChevronLeft,
   TbLock, TbMapPin, TbArrowRight, TbCircleCheck,
@@ -164,13 +164,13 @@ const OrderSummary = ({ cartItems, shippingCost, buttonLabel, onButtonClick, but
 // ── Main Checkout component ─────────────────────────────
 const Checkout = () => {
   const { cartItems, clearCart } = useCart()
-  const { user } = useAuth()
-  const navigate = useNavigate()
+  const { isAuthenticated, loading: authLoading } = useAuth()
 
   const [step, setStep] = useState('shipping')
   const [placing, setPlacing] = useState(false)
   const [placed, setPlaced]   = useState(false)
   const [orderNumber, setOrderNumber] = useState('')
+  const [error, setError] = useState('')
 
   const [shipping, setShipping] = useState({
     fullName: '', email: '', phone: '',
@@ -183,6 +183,20 @@ const Checkout = () => {
 
   const subtotal     = cartItems.reduce((s, i) => s + i.price * i.qty, 0)
   const shippingCost = subtotal >= 100 ? 0 : 25
+
+  if (authLoading) {
+    return (
+      <div style={{ background: C.bg, minHeight: '100vh' }}>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <p className="text-sm" style={{ color: C.textMuted }}>Loading checkout…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: '/checkout' }} replace />
+  }
 
   // ── Empty cart guard ──
   if (cartItems.length === 0 && !placed) {
@@ -243,6 +257,7 @@ const Checkout = () => {
     (cardDigits.length === 16 && /^\d{2}\/\d{2}$/.test(payment.expiry) && payment.cvc.length >= 3 && payment.nameOnCard.trim())
 
   const handlePlaceOrder = async () => {
+    setError('')
     setPlacing(true)
     try {
       let paymentIntentId = null
@@ -271,7 +286,7 @@ const Checkout = () => {
       setPlaced(true)
       clearCart()
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to place order. Please try again.')
+      setError(err.response?.data?.message || 'Failed to place order. Please try again.')
     } finally {
       setPlacing(false)
     }
@@ -283,6 +298,16 @@ const Checkout = () => {
 
         <h1 className="text-3xl font-bold mb-2 text-center" style={{ color: C.text }}>Checkout</h1>
         <StepIndicator current={step} />
+
+        {error && (
+          <div
+            role="alert"
+            className="max-w-5xl mx-auto mb-6 px-4 py-3 rounded-xl text-sm"
+            style={{ background: 'rgba(229,57,53,0.08)', color: '#C62828', border: '1px solid rgba(229,57,53,0.2)' }}
+          >
+            {error}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
 

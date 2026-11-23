@@ -1,6 +1,9 @@
+const mongoose = require('mongoose')
 const Order = require('../models/Order')
 const Product = require('../models/Product')
 const User = require('../models/User')
+
+const VALID_ORDER_STATUSES = Order.schema.path('status').enumValues
 
 // Shipping rule (must match the frontend): free over $100, otherwise $25
 const calcShipping = subtotal => (subtotal >= 100 ? 0 : 25)
@@ -18,12 +21,15 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Invalid payment method' })
     }
 
-    // Merge duplicate lines and validate quantities
+    // Merge duplicate lines and validate product IDs and quantities
     const qtyById = new Map()
     for (const it of items) {
+      if (!it || !it.product || !mongoose.Types.ObjectId.isValid(it.product)) {
+        return res.status(400).json({ message: 'Invalid product ID' })
+      }
       const qty = Number(it.qty)
-      if (!it.product || !Number.isInteger(qty) || qty < 1 || qty > 20) {
-        return res.status(400).json({ message: 'Invalid item or quantity' })
+      if (!Number.isInteger(qty) || qty < 1 || qty > 20) {
+        return res.status(400).json({ message: 'Invalid item quantity (must be an integer between 1 and 20)' })
       }
       const id = String(it.product)
       qtyById.set(id, (qtyById.get(id) || 0) + qty)
@@ -32,6 +38,13 @@ const createOrder = async (req, res) => {
     const products = await Product.find({ _id: { $in: [...qtyById.keys()] } })
     if (products.length !== qtyById.size) {
       return res.status(400).json({ message: 'One or more products no longer exist' })
+    }
+
+    const outOfStock = products.filter(p => p.inStock !== true)
+    if (outOfStock.length > 0) {
+      return res.status(400).json({
+        message: `${outOfStock.map(p => p.name).join(', ')} ${outOfStock.length === 1 ? 'is' : 'are'} currently out of stock`,
+      })
     }
 
     const orderItems = products.map(p => ({
@@ -59,7 +72,7 @@ const createOrder = async (req, res) => {
 
     res.status(201).json(order)
   } catch (err) {
-    res.status(400).json({ message: 'Failed to place order' })
+    res.status(400).json({ message: err.name === 'ValidationError' ? err.message : 'Failed to place order' })
   }
 }
 
@@ -86,8 +99,20 @@ const getAllOrders = async (req, res) => {
 // ── PUT /api/orders/:id/status — admin only ──
 const updateOrderStatus = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid order ID' })
+    }
+
     const { status } = req.body
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true })
+    if (!VALID_ORDER_STATUSES.includes(status)) {
+      return res.status(400).json({ message: 'Invalid order status' })
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    )
     if (!order) {
       return res.status(404).json({ message: 'Order not found' })
     }
