@@ -38,12 +38,27 @@ export const CartProvider = ({ children }) => {
     }
     lastAddedRef.current = { id: product.id, at: now }
 
+    const maxStock = typeof product.stock === 'number' ? product.stock : null
+    if (product.inStock === false || (maxStock !== null && maxStock <= 0)) {
+      setCartMessage(`${product.name} is out of stock`)
+      window.setTimeout(() => setCartMessage(''), 2000)
+      return
+    }
+
+    const existing = cartItems.find(item => item.id === product.id)
+    const currentQty = existing ? existing.qty : 0
+    if (maxStock !== null && currentQty + qty > maxStock) {
+      setCartMessage(`Only ${maxStock} left in stock for ${product.name}`)
+      window.setTimeout(() => setCartMessage(''), 2000)
+      return
+    }
+
     setCartItems(prev => {
-      const exists = prev.find(item => item.id === product.id)
-      if (exists) {
+      const found = prev.find(item => item.id === product.id)
+      if (found) {
         return prev.map(item =>
           item.id === product.id
-            ? { ...item, qty: item.qty + qty }
+            ? { ...item, qty: item.qty + qty, ...(maxStock !== null ? { stock: maxStock } : {}) }
             : item
         )
       }
@@ -58,14 +73,21 @@ export const CartProvider = ({ children }) => {
     setCartItems(prev => prev.filter(item => item.id !== productId))
   }
 
-  // ── Update qty by a delta (e.g. +1 / -1), minimum 1 ──
+  // ── Update qty by a delta (e.g. +1 / -1), minimum 1, capped at available stock ──
   const updateQty = (productId, delta) => {
+    const target = cartItems.find(item => item.id === productId)
+    if (delta > 0 && target && typeof target.stock === 'number' && target.qty + delta > target.stock) {
+      setCartMessage(`Only ${target.stock} left in stock`)
+      window.setTimeout(() => setCartMessage(''), 2000)
+      return
+    }
     setCartItems(prev =>
-      prev.map(item =>
-        item.id === productId
-          ? { ...item, qty: Math.max(1, item.qty + delta) }
-          : item
-      )
+      prev.map(item => {
+        if (item.id !== productId) return item
+        const nextQty = Math.max(1, item.qty + delta)
+        const capped = typeof item.stock === 'number' ? Math.min(nextQty, Math.max(1, item.stock)) : nextQty
+        return { ...item, qty: capped }
+      })
     )
   }
 
@@ -75,7 +97,11 @@ export const CartProvider = ({ children }) => {
       removeFromCart(productId)
     } else {
       setCartItems(prev =>
-        prev.map(item => item.id === productId ? { ...item, qty } : item)
+        prev.map(item => {
+          if (item.id !== productId) return item
+          const capped = typeof item.stock === 'number' ? Math.min(qty, Math.max(1, item.stock)) : qty
+          return { ...item, qty: capped }
+        })
       )
     }
   }

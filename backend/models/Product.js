@@ -50,7 +50,16 @@ const productSchema = new mongoose.Schema(
     },
     inStock: {
       type: Boolean,
-      default: true,
+      default: false,
+    },
+    stock: {
+      type: Number,
+      default: 0,
+      min: [0, 'Stock cannot be negative'],
+      validate: {
+        validator: Number.isInteger,
+        message: 'Stock must be a whole number',
+      },
     },
     sku: {
       type: String,
@@ -58,11 +67,16 @@ const productSchema = new mongoose.Schema(
       sparse: true,
     },
     imageUrl: {
-    type: String,
-    default: '',
-},
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 )
+
+productSchema.pre('save', function (next) {
+  this.inStock = (this.stock ?? 0) > 0
+  next()
+})
 
 module.exports = mongoose.model('Product', productSchema)

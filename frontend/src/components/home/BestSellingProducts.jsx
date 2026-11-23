@@ -38,13 +38,15 @@ const BestSellingProducts = () => {
   }, [])
 
   const handleAddToCart = (product) => {
-    if (product.inStock === false) return
+    if (product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0)) return
     addToCart({
       id:       product._id,
       name:     product.name,
       price:    product.price,
       emoji:    product.emoji,
       imageUrl: product.imageUrl,
+      stock:    product.stock,
+      inStock:  product.inStock,
       category: product.category,
     })
   }
@@ -92,7 +94,7 @@ const BestSellingProducts = () => {
       {!loading && !error && products.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {products.map((product) => {
-            const outOfStock = product.inStock === false
+            const outOfStock = product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0)
             return (
               <div
                 key={product._id}

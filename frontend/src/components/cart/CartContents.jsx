@@ -73,8 +73,12 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => (
       </span>
       <button
         onClick={() => onUpdateQty(item.id, +1)}
+        disabled={typeof item.stock === 'number' && item.qty >= item.stock}
         className="p-1 rounded transition-colors"
-        style={{ color: C.accent }}
+        style={{
+          color: typeof item.stock === 'number' && item.qty >= item.stock ? C.textMuted : C.accent,
+          cursor: typeof item.stock === 'number' && item.qty >= item.stock ? 'not-allowed' : 'pointer',
+        }}
         onMouseEnter={e => e.currentTarget.style.background = C.accentLight}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
       >

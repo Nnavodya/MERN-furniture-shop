@@ -10,7 +10,7 @@ const ALLOWED_PRODUCT_FIELDS = [
   'emoji',
   'description',
   'colors',
-  'inStock',
+  'stock',
   'sku',
   'imageUrl',
 ]
@@ -25,6 +25,14 @@ const pickProductFields = (body = {}) => {
     }
   }
   return data
+}
+
+const parseValidStock = (rawStock) => {
+  const num = Number(rawStock)
+  if (!Number.isInteger(num) || num < 0) {
+    return null
+  }
+  return num
 }
 
 // ── GET /api/products — public, supports ?category= & ?search= ──
@@ -67,6 +75,17 @@ const getProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const payload = pickProductFields(req.body)
+    if (payload.stock !== undefined) {
+      const validStock = parseValidStock(payload.stock)
+      if (validStock === null) {
+        return res.status(400).json({ message: 'Stock must be a non-negative whole number' })
+      }
+      payload.stock = validStock
+    } else {
+      payload.stock = 0
+    }
+    payload.inStock = payload.stock > 0
+
     const product = await Product.create(payload)
     res.status(201).json(product)
   } catch (err) {
@@ -81,6 +100,15 @@ const updateProduct = async (req, res) => {
       return res.status(400).json({ message: 'Invalid product ID' })
     }
     const payload = pickProductFields(req.body)
+    if (payload.stock !== undefined) {
+      const validStock = parseValidStock(payload.stock)
+      if (validStock === null) {
+        return res.status(400).json({ message: 'Stock must be a non-negative whole number' })
+      }
+      payload.stock = validStock
+      payload.inStock = validStock > 0
+    }
+
     const product = await Product.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true,

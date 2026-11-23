@@ -16,7 +16,7 @@ const C = {
 
 const EMPTY_FORM = {
   name: '', category: 'living-room', price: '', oldPrice: '',
-  badge: '', emoji: '🪑', description: '', inStock: true, sku: '',
+  badge: '', emoji: '🪑', description: '', stock: 0, sku: '',
   imageUrl: '', 
 }
 
@@ -73,14 +73,20 @@ const AdminProducts = () => {
       badge:       product.badge       || '',
       emoji:       product.emoji       || '🪑',
       description: product.description || '',
-      inStock:     product.inStock !== false,
+      stock:       product.stock !== undefined ? product.stock : (product.inStock ? 1 : 0),
       sku:         product.sku         || '',
+      imageUrl:    product.imageUrl    || '',
     })
     setShowForm(true)
   }
 
   const handleSave = async (e) => {
     e.preventDefault()
+    const parsedStock = Number(form.stock)
+    if (!Number.isInteger(parsedStock) || parsedStock < 0) {
+      setError('Stock must be a non-negative whole number.')
+      return
+    }
     setSaving(true)
     setError('')
     try {
@@ -88,6 +94,7 @@ const AdminProducts = () => {
         ...form,
         price:    Number(form.price),
         oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
+        stock:    parsedStock,
       }
       if (editing) {
         await api.put(`/products/${editing._id}`, payload)
@@ -206,15 +213,21 @@ const AdminProducts = () => {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{
-                        background: product.inStock ? 'rgba(76,175,80,0.15)' : 'rgba(244,67,54,0.15)',
-                        color:      product.inStock ? '#81C784' : '#EF9A9A',
-                      }}
-                    >
-                      {product.inStock ? 'In Stock' : 'Out of Stock'}
-                    </span>
+                    {(() => {
+                      const qty = product.stock ?? (product.inStock ? 1 : 0)
+                      const available = qty > 0 && product.inStock !== false
+                      return (
+                        <span
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          style={{
+                            background: available ? 'rgba(76,175,80,0.15)' : 'rgba(244,67,54,0.15)',
+                            color:      available ? '#81C784' : '#EF9A9A',
+                          }}
+                        >
+                          {available ? `In Stock (${qty})` : 'Out of Stock (0)'}
+                        </span>
+                      )
+                    })()}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -346,13 +359,20 @@ const AdminProducts = () => {
   )}
 </Field>
 
-              <label className="flex items-center gap-2 cursor-pointer">
+              <Field label="Stock Quantity">
                 <input
-                  type="checkbox" checked={form.inStock}
-                  onChange={e => setForm({...form, inStock: e.target.checked})}
+                  type="number"
+                  min="0"
+                  step="1"
+                  required
+                  style={inputStyle}
+                  value={form.stock}
+                  onChange={e => setForm({...form, stock: e.target.value})}
                 />
-                <span className="text-xs" style={{ color: C.text }}>In Stock</span>
-              </label>
+                <span className="text-[11px]" style={{ color: Number(form.stock) > 0 ? '#81C784' : '#EF9A9A' }}>
+                  {Number(form.stock) > 0 ? 'Status: In Stock' : 'Status: Out of Stock'}
+                </span>
+              </Field>
 
               <div className="flex gap-3 mt-2">
                 <button

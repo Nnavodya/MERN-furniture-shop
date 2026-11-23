@@ -43,6 +43,10 @@ const orderSchema = new mongoose.Schema(
       enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
       default: 'pending',
     },
+    stockRestored: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 )

@@ -62,6 +62,8 @@ const Sale = () => {
       price:    product.price,
       emoji:    product.emoji,
       imageUrl: product.imageUrl,
+      stock:    product.stock,
+      inStock:  product.inStock,
       category: categoryLabels[product.category] || '',
     })
   }
@@ -202,15 +204,26 @@ const Sale = () => {
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="flex items-center justify-center gap-1 w-full py-1.5 rounded-lg text-xs font-medium transition-all"
-                      style={{ background: C.accentLight, color: C.accent, border: `1px solid ${C.accentBorder}` }}
-                      onMouseEnter={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.color = '#FFFFFF' }}
-                      onMouseLeave={e => { e.currentTarget.style.background = C.accentLight; e.currentTarget.style.color = C.accent }}
-                    >
-                      <TbShoppingCart className="h-3.5 w-3.5" /> Add
-                    </button>
+                    {(() => {
+                      const outOfStock = product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0)
+                      return (
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          disabled={outOfStock}
+                          className="flex items-center justify-center gap-1 w-full py-1.5 rounded-lg text-xs font-medium transition-all"
+                          style={{
+                            background: outOfStock ? C.divider : C.accentLight,
+                            color: outOfStock ? C.textMuted : C.accent,
+                            border: `1px solid ${outOfStock ? C.divider : C.accentBorder}`,
+                            cursor: outOfStock ? 'not-allowed' : 'pointer',
+                          }}
+                          onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.background = C.accent; e.currentTarget.style.color = '#FFFFFF' } }}
+                          onMouseLeave={e => { if (!outOfStock) { e.currentTarget.style.background = C.accentLight; e.currentTarget.style.color = C.accent } }}
+                        >
+                          <TbShoppingCart className="h-3.5 w-3.5" /> {outOfStock ? 'Out of Stock' : 'Add'}
+                        </button>
+                      )
+                    })()}
                   </div>
                 </div>
               )

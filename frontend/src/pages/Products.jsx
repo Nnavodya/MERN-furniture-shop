@@ -95,11 +95,13 @@ const Products = () => {
 
   const handleAddToCart = (product) => {
     addToCart({
-      id:    product._id,
-      name:  product.name,
-      price: product.price,
-      emoji: product.emoji,
+      id:       product._id,
+      name:     product.name,
+      price:    product.price,
+      emoji:    product.emoji,
       imageUrl: product.imageUrl,
+      stock:    product.stock,
+      inStock:  product.inStock,
       category: categories.find(c => c.path === product.category)?.label || '',
     })
   }
@@ -305,19 +307,46 @@ const Products = () => {
                     <span className="text-xs" style={{ color: C.textMuted }}>({product.reviews})</span>
                   </div>
 
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium" style={{
+                      color: (product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0))
+                        ? '#E53935'
+                        : typeof product.stock === 'number' && product.stock <= 5
+                        ? '#B8860B'
+                        : '#2E7D32',
+                    }}>
+                      {(product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0))
+                        ? 'Out of stock'
+                        : typeof product.stock === 'number' && product.stock <= 5
+                        ? `Only ${product.stock} left`
+                        : 'In stock'}
+                    </span>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold" style={{ color: C.accent }}>
                       ${product.price.toLocaleString()}
                     </span>
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all"
-                      style={{ background: C.accentLight, color: C.accent, border: `1px solid ${C.accentBorder}` }}
-                      onMouseEnter={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.color = '#FFFFFF' }}
-                      onMouseLeave={e => { e.currentTarget.style.background = C.accentLight; e.currentTarget.style.color = C.accent }}
-                    >
-                      <TbShoppingCart className="h-3.5 w-3.5" /> Add
-                    </button>
+                    {(() => {
+                      const outOfStock = product.inStock === false || (typeof product.stock === 'number' && product.stock <= 0)
+                      return (
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          disabled={outOfStock}
+                          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all"
+                          style={{
+                            background: outOfStock ? C.divider : C.accentLight,
+                            color: outOfStock ? C.textMuted : C.accent,
+                            border: `1px solid ${outOfStock ? C.divider : C.accentBorder}`,
+                            cursor: outOfStock ? 'not-allowed' : 'pointer',
+                          }}
+                          onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.background = C.accent; e.currentTarget.style.color = '#FFFFFF' } }}
+                          onMouseLeave={e => { if (!outOfStock) { e.currentTarget.style.background = C.accentLight; e.currentTarget.style.color = C.accent } }}
+                        >
+                          <TbShoppingCart className="h-3.5 w-3.5" /> {outOfStock ? 'Sold Out' : 'Add'}
+                        </button>
+                      )
+                    })()}
                   </div>
                 </div>
               </div>

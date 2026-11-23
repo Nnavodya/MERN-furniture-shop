@@ -99,14 +99,19 @@ const ProductDetails = () => {
 
   const categoryLabel = categoryLabels[product.category] || product.category
   const wishlisted    = isWishlisted(product._id)
+  const availableStock = typeof product.stock === 'number' ? product.stock : (product.inStock ? 20 : 0)
+  const outOfStock     = !product.inStock || availableStock <= 0
 
   const handleAddToCart = () => {
+    if (outOfStock) return
     addToCart({
       id:       product._id,
       name:     product.name,
       price:    product.price,
       emoji:    product.emoji,
       imageUrl: product.imageUrl,
+      stock:    product.stock,
+      inStock:  product.inStock,
       category: categoryLabel,
     }, qty)
     setJustAdded(true)
@@ -253,8 +258,16 @@ const ProductDetails = () => {
               )}
             </div>
 
-            <p className="text-sm leading-relaxed mb-6" style={{ color: C.textMuted }}>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: C.textMuted }}>
               {product.description}
+            </p>
+
+            <p className="text-xs font-semibold mb-6" style={{ color: outOfStock ? '#E53935' : '#2E7D32' }}>
+              {outOfStock
+                ? 'Out of Stock'
+                : typeof product.stock === 'number'
+                ? `In Stock — ${product.stock} available`
+                : 'In Stock'}
             </p>
 
             {product.colors?.length > 0 && (
@@ -286,25 +299,29 @@ const ProductDetails = () => {
                   <TbMinus className="h-4 w-4" />
                 </button>
                 <span className="text-sm font-bold w-6 text-center" style={{ color: C.text }}>{qty}</span>
-                <button onClick={() => setQty(q => q + 1)} style={{ color: C.accent }}>
+                <button
+                  onClick={() => setQty(q => Math.min(Math.max(1, availableStock), q + 1))}
+                  disabled={outOfStock || qty >= availableStock}
+                  style={{ color: outOfStock || qty >= availableStock ? C.textMuted : C.accent, cursor: outOfStock || qty >= availableStock ? 'not-allowed' : 'pointer' }}
+                >
                   <TbPlus className="h-4 w-4" />
                 </button>
               </div>
 
               <button
                 onClick={handleAddToCart}
-                disabled={!product.inStock}
+                disabled={outOfStock}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all"
                 style={{
-                  background: product.inStock ? C.accent : C.divider,
+                  background: !outOfStock ? C.accent : C.divider,
                   color: '#FFFFFF',
-                  cursor: product.inStock ? 'pointer' : 'not-allowed',
+                  cursor: !outOfStock ? 'pointer' : 'not-allowed',
                 }}
-                onMouseEnter={e => { if (product.inStock) e.currentTarget.style.background = '#7A5229' }}
-                onMouseLeave={e => { if (product.inStock) e.currentTarget.style.background = C.accent }}
+                onMouseEnter={e => { if (!outOfStock) e.currentTarget.style.background = '#7A5229' }}
+                onMouseLeave={e => { if (!outOfStock) e.currentTarget.style.background = C.accent }}
               >
                 <TbShoppingCart className="h-4 w-4" />
-                {justAdded ? 'Added to Cart ✓' : 'Add to Cart'}
+                {outOfStock ? 'Out of Stock' : justAdded ? 'Added to Cart ✓' : 'Add to Cart'}
               </button>
 
               <button
