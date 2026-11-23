@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { TbSearch, TbHeart, TbShoppingCart, TbStar } from 'react-icons/tb'
+import { TbSearch, TbHeart, TbShoppingCart, TbStar, TbX } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import api from '../api/axios'
@@ -36,17 +36,27 @@ const sortOptions = [
 ]
 
 const Products = () => {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const activeCat    = searchParams.get('category') || ''
   const activeFilter = searchParams.get('filter')   || ''
+  const search       = searchParams.get('search')   || ''
   const [sort, setSort]         = useState('featured')
-  const [search, setSearch]     = useState('')
   const [products, setProducts] = useState([])
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState('')
 
   const { addToCart } = useCart()
   const { isWishlisted, toggleWishlist } = useWishlist()
+
+  const handleSearchChange = (value) => {
+    const next = new URLSearchParams(searchParams)
+    if (value) {
+      next.set('search', value)
+    } else {
+      next.delete('search')
+    }
+    setSearchParams(next, { replace: true })
+  }
 
   // ── Fetch products from real API ──
   useEffect(() => {
@@ -55,8 +65,8 @@ const Products = () => {
         setLoading(true)
         setError('')
         const params = {}
-        if (activeCat) params.category = activeCat
-        if (search)    params.search   = search
+        if (activeCat)     params.category = activeCat
+        if (search.trim()) params.search   = search.trim()
         const { data } = await api.get('/products', { params })
         setProducts(data)
       } catch (err) {
@@ -135,10 +145,21 @@ const Products = () => {
               type="text"
               placeholder="Search products..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => handleSearchChange(e.target.value)}
               className="bg-transparent border-none outline-none text-sm w-full"
               style={{ color: C.text }}
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange('')}
+                aria-label="Clear search"
+                className="shrink-0 flex items-center"
+                style={{ color: C.textMuted }}
+              >
+                <TbX className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           <select
@@ -191,7 +212,21 @@ const Products = () => {
         {!loading && !error && sorted.length === 0 && (
           <div className="text-center py-20" style={{ color: C.textMuted }}>
             <p className="text-lg font-medium">No products found</p>
-            <p className="text-sm mt-1">Try a different search or category</p>
+            <p className="text-sm mt-1">
+              {search.trim()
+                ? `No results for "${search.trim()}". Try a different search or category.`
+                : 'Try a different search or category'}
+            </p>
+            {search.trim() && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange('')}
+                className="mt-4 px-5 py-2 rounded-lg text-xs font-semibold transition-all"
+                style={{ background: C.accent, color: '#FFFFFF' }}
+              >
+                Clear search
+              </button>
+            )}
           </div>
         )}
 

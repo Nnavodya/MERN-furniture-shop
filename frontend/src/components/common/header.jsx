@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Topbar from '../layout/Topbar'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   TbArmchair, TbLayoutGrid, TbHome, TbTag,
@@ -169,6 +169,38 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
   const [menuOpen,     setMenuOpen] = useState(false)
   const [showDropdown, setDropdown] = useState(false)
   const { isAuthenticated, user, logout } = useAuth()
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const [searchParams] = useSearchParams()
+  const urlSearch = pathname === '/products' ? (searchParams.get('search') || '') : ''
+  const [searchQuery, setSearchQuery] = useState(urlSearch)
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlSearch)
+
+  if (urlSearch !== prevUrlSearch) {
+    setPrevUrlSearch(urlSearch)
+    setSearchQuery(urlSearch)
+  }
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    const trimmed = searchQuery.trim()
+    setMenuOpen(false)
+    if (trimmed) {
+      navigate(`/products?search=${encodeURIComponent(trimmed)}`)
+    } else {
+      navigate('/products')
+    }
+  }
+
+  const handleClearSearch = () => {
+    setSearchQuery('')
+    if (pathname === '/products' && searchParams.get('search')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('search')
+      const qs = next.toString()
+      navigate(qs ? `/products?${qs}` : '/products')
+    }
+  }
 
   return (
     <>
@@ -246,18 +278,34 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <div
+            <form
+              onSubmit={handleSearchSubmit}
               className="hidden md:flex items-center rounded-lg px-3 py-2 gap-2"
               style={{ background: C.navSecondary, border: `0.5px solid ${C.accentBorder}` }}
             >
-              <TbSearch className="h-4 w-4 shrink-0" style={{ color: C.accent }} />
+              <button type="submit" aria-label="Search products" className="shrink-0 flex items-center">
+                <TbSearch className="h-4 w-4" style={{ color: C.accent }} />
+              </button>
               <input
                 type="text"
                 placeholder="Search sofas, tables, chairs..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="bg-transparent border-none outline-none text-sm w-40"
                 style={{ color: C.text }}
               />
-            </div>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  aria-label="Clear search"
+                  className="shrink-0 flex items-center"
+                  style={{ color: C.textMuted }}
+                >
+                  <TbX className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </form>
 
             <IconBtn
               to="/wishlist"
@@ -331,18 +379,34 @@ const Header = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
             className="lg:hidden px-4 py-4 space-y-1"
             style={{ borderTop: `1px solid ${C.divider}`, background: C.navBg }}
           >
-            <div
+            <form
+              onSubmit={handleSearchSubmit}
               className="flex items-center rounded-lg px-3 py-2 gap-2 mb-3"
               style={{ background: C.navSecondary, border: `0.5px solid ${C.accentBorder}` }}
             >
-              <TbSearch className="h-4 w-4" style={{ color: C.accent }} />
+              <button type="submit" aria-label="Search products" className="shrink-0 flex items-center">
+                <TbSearch className="h-4 w-4" style={{ color: C.accent }} />
+              </button>
               <input
                 type="text"
                 placeholder="Search furniture..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="bg-transparent border-none outline-none text-sm w-full"
                 style={{ color: C.text }}
               />
-            </div>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  aria-label="Clear search"
+                  className="shrink-0 flex items-center"
+                  style={{ color: C.textMuted }}
+                >
+                  <TbX className="h-4 w-4" />
+                </button>
+              )}
+            </form>
 
             {[
               { to: '/',         icon: TbHome,       label: 'Home'     },
