@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { TbSearch, TbHeart, TbShoppingCart, TbStar } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
@@ -37,7 +37,8 @@ const sortOptions = [
 
 const Products = () => {
   const [searchParams] = useSearchParams()
-  const activeCat = searchParams.get('category') || ''
+  const activeCat    = searchParams.get('category') || ''
+  const activeFilter = searchParams.get('filter')   || ''
   const [sort, setSort]         = useState('featured')
   const [search, setSearch]     = useState('')
   const [products, setProducts] = useState([])
@@ -71,7 +72,14 @@ const Products = () => {
   const sorted = [...products].sort((a, b) => {
     if (sort === 'price-asc')  return a.price - b.price
     if (sort === 'price-desc') return b.price - a.price
-    if (sort === 'newest')     return new Date(b.createdAt) - new Date(a.createdAt)
+    if (sort === 'newest' || (sort === 'featured' && activeFilter === 'new')) {
+      if (activeFilter === 'new' && sort === 'featured') {
+        const aNew = a.badge === 'New' ? 1 : 0
+        const bNew = b.badge === 'New' ? 1 : 0
+        if (bNew !== aNew) return bNew - aNew
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt)
+    }
     return 0
   })
 
@@ -105,7 +113,11 @@ const Products = () => {
         {/* ── Page Header ── */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-1" style={{ color: C.text }}>
-            {activeCat ? categories.find(c => c.path === activeCat)?.label : 'All Products'}
+            {activeCat
+              ? categories.find(c => c.path === activeCat)?.label
+              : activeFilter === 'new'
+              ? 'New Arrivals'
+              : 'All Products'}
           </h1>
           <p className="text-sm" style={{ color: C.textMuted }}>
             {loading ? 'Loading…' : `${sorted.length} products found`}

@@ -1,9 +1,9 @@
-import React from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { TbHeart, TbShoppingCart, TbStar, TbFlame } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { products, categories } from '../data/products'
+import api from '../api/axios'
 
 const C = {
   bg:           '#FAF7F4',
@@ -16,26 +16,65 @@ const C = {
   divider:      'rgba(139,94,46,0.12)',
 }
 
+const categoryLabels = {
+  'living-room': 'Living Room',
+  'bedroom':     'Bedroom',
+  'dining':      'Dining Room',
+  'office':      'Office',
+  'outdoor':     'Outdoor',
+  'storage':     'Storage',
+  'lighting':    'Lighting',
+  'decor':       'Decor',
+}
+
 const Sale = () => {
   const { addToCart } = useCart()
   const { isWishlisted, toggleWishlist } = useWishlist()
 
-  // ── Products on sale — has an oldPrice in the shared data set ──
-  const saleProducts = products.filter(p => p.oldPrice)
+  const [products, setProducts] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
+
+  useEffect(() => {
+    const fetchSaleProducts = async () => {
+      try {
+        setLoading(true)
+        setError('')
+        const { data } = await api.get('/products')
+        setProducts(data)
+      } catch (err) {
+        setError('Failed to load sale products. Please try again.')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchSaleProducts()
+  }, [])
+
+  // ── Products on sale — oldPrice is greater than current price ──
+  const saleProducts = products.filter(p => p.oldPrice && p.oldPrice > p.price)
 
   const handleAddToCart = (product) => {
     addToCart({
-      id: product.id, name: product.name, price: product.price, emoji: product.emoji,
+      id:       product._id,
+      name:     product.name,
+      price:    product.price,
+      emoji:    product.emoji,
       imageUrl: product.imageUrl,
-      category: categories.find(c => c.path === product.category)?.label || '',
+      category: categoryLabels[product.category] || '',
     })
   }
 
   const handleToggleWishlist = (product) => {
     toggleWishlist({
-      id: product.id, name: product.name, price: product.price,
-      emoji: product.emoji, imageUrl: product.imageUrl,
-      rating: product.rating, reviews: product.reviews,
+      id:       product._id,
+      name:     product.name,
+      price:    product.price,
+      emoji:    product.emoji,
+      imageUrl: product.imageUrl,
+      rating:   product.rating,
+      reviews:  product.reviews,
     })
   }
 
@@ -62,10 +101,22 @@ const Sale = () => {
 
       <div className="container mx-auto px-4 py-10">
         <p className="text-sm mb-6" style={{ color: C.textMuted }}>
-          {saleProducts.length} items on sale
+          {loading ? 'Loading…' : `${saleProducts.length} items on sale`}
         </p>
 
-        {saleProducts.length === 0 ? (
+        {loading && (
+          <div className="text-center py-20" style={{ color: C.textMuted }}>
+            <p className="text-sm">Loading sale products…</p>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="text-center py-20" style={{ color: '#E53935' }}>
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && saleProducts.length === 0 && (
           <div className="text-center py-20" style={{ color: C.textMuted }}>
             <p className="text-lg font-medium">No active sale items right now</p>
             <p className="text-sm mt-1">Check back soon, or browse all products.</p>
@@ -77,19 +128,21 @@ const Sale = () => {
               Browse Products
             </Link>
           </div>
-        ) : (
+        )}
+
+        {!loading && !error && saleProducts.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {saleProducts.map(product => {
               const discountPct = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
               return (
                 <div
-                  key={product.id}
+                  key={product._id}
                   className="relative rounded-xl overflow-hidden transition-all duration-200"
                   style={{ background: C.card, border: `1px solid ${C.divider}` }}
                   onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 24px rgba(44,26,14,0.10)'}
                   onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
                 >
-                  <Link to={`/products/${product.id}`}>
+                  <Link to={`/products/${product._id}`}>
                     <div
                       className="relative w-full flex items-center justify-center text-4xl"
                       style={{ paddingBottom: '75%', background: C.accentLight }}
@@ -120,15 +173,15 @@ const Sale = () => {
                     style={{
                       top: '8px', right: '8px', background: '#FFFFFF',
                       border: `1px solid ${C.accentBorder}`,
-                      color: isWishlisted(product.id) ? '#E53935' : C.textMuted,
+                      color: isWishlisted(product._id) ? '#E53935' : C.textMuted,
                     }}
                     aria-label="Toggle wishlist"
                   >
-                    <TbHeart className="h-3.5 w-3.5" style={{ fill: isWishlisted(product.id) ? '#E53935' : 'none' }} />
+                    <TbHeart className="h-3.5 w-3.5" style={{ fill: isWishlisted(product._id) ? '#E53935' : 'none' }} />
                   </button>
 
                   <div className="p-3">
-                    <Link to={`/products/${product.id}`}>
+                    <Link to={`/products/${product._id}`}>
                       <h3 className="text-sm font-semibold mb-1 leading-snug" style={{ color: C.text }}>
                         {product.name}
                       </h3>
