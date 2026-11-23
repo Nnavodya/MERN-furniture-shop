@@ -37,7 +37,7 @@ const AdminOrders = () => {
         setLoading(true)
         const { data } = await api.get('/orders')
         setOrders(data)
-      } catch (err) {
+      } catch {
         setError('Failed to load orders.')
       } finally {
         setLoading(false)
@@ -47,12 +47,13 @@ const AdminOrders = () => {
   }, [])
 
   const handleStatusUpdate = async (orderId, newStatus) => {
+    setError('')
     setUpdating(orderId)
     try {
       const { data } = await api.put(`/orders/${orderId}/status`, { status: newStatus })
       setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: data.status } : o))
     } catch (err) {
-      setError('Failed to update order status.')
+      setError(err.response?.data?.message || 'Failed to update order status.')
     } finally {
       setUpdating(null)
     }
@@ -147,7 +148,24 @@ const AdminOrders = () => {
 
                     {/* Payment */}
                     <td className="px-4 py-3 text-xs capitalize" style={{ color: C.textMuted }}>
-                      {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Card'}
+                      <p>{order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Card'}</p>
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-1"
+                        style={{
+                          background: order.paymentStatus === 'paid'
+                            ? 'rgba(76,175,80,0.15)'
+                            : order.paymentStatus === 'failed'
+                            ? 'rgba(244,67,54,0.15)'
+                            : 'rgba(255,193,7,0.15)',
+                          color: order.paymentStatus === 'paid'
+                            ? '#81C784'
+                            : order.paymentStatus === 'failed'
+                            ? '#EF9A9A'
+                            : '#FFC107',
+                        }}
+                      >
+                        {order.paymentStatus || 'pending'}
+                      </span>
                     </td>
 
                     {/* Status dropdown */}
@@ -155,17 +173,22 @@ const AdminOrders = () => {
                       <select
                         value={order.status}
                         onChange={e => handleStatusUpdate(order._id, e.target.value)}
-                        disabled={updating === order._id}
+                        disabled={updating === order._id || order.status === 'cancelled'}
                         className="text-[10px] font-bold px-2 py-1 rounded-full outline-none cursor-pointer"
                         style={{
                           background: statusColors[order.status]?.bg || 'rgba(255,255,255,0.1)',
                           color:      statusColors[order.status]?.text || C.text,
                           border:     'none',
-                          opacity:    updating === order._id ? 0.6 : 1,
+                          opacity:    updating === order._id || order.status === 'cancelled' ? 0.6 : 1,
                         }}
                       >
                         {statusOptions.map(s => (
-                          <option key={s} value={s} style={{ background: '#231208', color: C.text }}>
+                          <option
+                            key={s}
+                            value={s}
+                            disabled={order.status === 'delivered' && s === 'cancelled'}
+                            style={{ background: '#231208', color: C.text }}
+                          >
                             {s.charAt(0).toUpperCase() + s.slice(1)}
                           </option>
                         ))}
@@ -226,10 +249,15 @@ const AdminOrders = () => {
                         </div>
 
                         {/* Order totals */}
-                        <div className="mt-3 pt-3 flex gap-6" style={{ borderTop: `1px solid ${C.divider}` }}>
+                        <div className="mt-3 pt-3 flex flex-wrap gap-6" style={{ borderTop: `1px solid ${C.divider}` }}>
                           <span className="text-xs" style={{ color: C.textMuted }}>
                             Subtotal: <span style={{ color: C.text }}>${order.subtotal?.toLocaleString()}</span>
                           </span>
+                          {order.discountAmount > 0 && (
+                            <span className="text-xs" style={{ color: '#81C784' }}>
+                              Discount{order.couponCode ? ` (${order.couponCode})` : ''}: −${order.discountAmount?.toLocaleString()}
+                            </span>
+                          )}
                           <span className="text-xs" style={{ color: C.textMuted }}>
                             Shipping: <span style={{ color: C.text }}>
                               {order.shippingCost === 0 ? 'Free' : `$${order.shippingCost}`}
@@ -237,6 +265,9 @@ const AdminOrders = () => {
                           </span>
                           <span className="text-xs font-bold" style={{ color: C.accent }}>
                             Total: ${order.total?.toLocaleString()}
+                          </span>
+                          <span className="text-xs ml-auto" style={{ color: order.confirmationEmailSent ? '#81C784' : C.textMuted }}>
+                            Confirmation Email: {order.confirmationEmailSent ? 'Sent' : 'Not sent'}
                           </span>
                         </div>
                       </td>

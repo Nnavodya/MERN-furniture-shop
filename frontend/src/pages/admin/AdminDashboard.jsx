@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   TbPackage, TbShoppingBag, TbUsers, TbCurrencyDollar,
-  TbArrowRight, TbTrendingUp,
+  TbArrowRight,
 } from 'react-icons/tb'
 import api from '../../api/axios'
 
@@ -66,7 +66,13 @@ const AdminDashboard = () => {
     { icon: TbPackage,        label: 'Total Products', value: stats?.totalProducts ?? 0,                          link: '/admin/products' },
     { icon: TbShoppingBag,    label: 'Total Orders',   value: stats?.totalOrders   ?? 0,                          link: '/admin/orders'   },
     { icon: TbUsers,          label: 'Total Users',    value: stats?.totalUsers    ?? 0,                          link: null              },
-    { icon: TbCurrencyDollar, label: 'Total Revenue',  value: `$${(stats?.totalRevenue ?? 0).toLocaleString()}`, link: null              },
+    {
+      icon: TbCurrencyDollar,
+      label: 'Active Revenue',
+      value: `$${(stats?.totalRevenue ?? 0).toLocaleString()}`,
+      sub: `Paid: $${(stats?.paidRevenue ?? 0).toLocaleString()} · Pending COD: $${(stats?.pendingCodRevenue ?? 0).toLocaleString()}`,
+      link: null,
+    },
   ]
 
   return (
@@ -78,7 +84,7 @@ const AdminDashboard = () => {
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {statCards.map(({ icon: Icon, label, value, link }) => (
+        {statCards.map(({ icon: Icon, label, value, sub, link }) => (
           <div
             key={label}
             className="rounded-xl p-5"
@@ -99,6 +105,9 @@ const AdminDashboard = () => {
             </div>
             <p className="text-2xl font-bold mb-1" style={{ color: C.text }}>{value}</p>
             <p className="text-xs" style={{ color: C.textMuted }}>{label}</p>
+            {sub && (
+              <p className="text-[10px] mt-1" style={{ color: C.accent }}>{sub}</p>
+            )}
           </div>
         ))}
       </div>

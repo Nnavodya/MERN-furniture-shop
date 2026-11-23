@@ -290,10 +290,17 @@ const getDashboardStats = async (req, res) => {
       Product.countDocuments(),
       Order.countDocuments(),
       User.countDocuments({ role: 'user' }),
-      Order.find().select('total status createdAt'),
+      Order.find().select('total status paymentMethod paymentStatus createdAt'),
     ])
 
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0)
+    const nonCancelled = orders.filter(o => o.status !== 'cancelled')
+    const totalRevenue = nonCancelled.reduce((sum, o) => sum + o.total, 0)
+    const paidRevenue = nonCancelled
+      .filter(o => o.paymentStatus === 'paid')
+      .reduce((sum, o) => sum + o.total, 0)
+    const pendingCodRevenue = nonCancelled
+      .filter(o => o.paymentMethod === 'cod' && o.paymentStatus === 'pending')
+      .reduce((sum, o) => sum + o.total, 0)
 
     const statusBreakdown = orders.reduce((acc, o) => {
       acc[o.status] = (acc[o.status] || 0) + 1
@@ -305,6 +312,8 @@ const getDashboardStats = async (req, res) => {
       totalOrders,
       totalUsers,
       totalRevenue,
+      paidRevenue,
+      pendingCodRevenue,
       statusBreakdown,
     })
   } catch (err) {

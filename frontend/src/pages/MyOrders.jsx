@@ -23,6 +23,12 @@ const statusColors = {
   cancelled:  { bg: 'rgba(244,67,54,0.12)',  text: '#C62828' },
 }
 
+const paymentStatusColors = {
+  pending: { bg: 'rgba(255,193,7,0.12)', text: '#B8860B' },
+  paid:    { bg: 'rgba(76,175,80,0.12)', text: '#2E7D32' },
+  failed:  { bg: 'rgba(244,67,54,0.12)', text: '#C62828' },
+}
+
 const MyOrders = () => {
   const { isAuthenticated } = useAuth()
   const [orders, setOrders]     = useState([])
@@ -214,6 +220,12 @@ const MyOrders = () => {
                         <span>Subtotal</span>
                         <span>${order.subtotal?.toLocaleString()}</span>
                       </div>
+                      {order.discountAmount > 0 && (
+                        <div className="flex justify-between text-xs" style={{ color: '#2E7D32' }}>
+                          <span>Discount{order.couponCode ? ` (${order.couponCode})` : ''}</span>
+                          <span>−${order.discountAmount?.toLocaleString()}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-xs" style={{ color: C.textMuted }}>
                         <span>Shipping</span>
                         <span style={{ color: order.shippingCost === 0 ? '#2E7D32' : C.textMuted }}>
@@ -229,10 +241,21 @@ const MyOrders = () => {
                       </div>
                     </div>
 
-                    {/* Payment method */}
-                    <p className="text-xs mt-3" style={{ color: C.textMuted }}>
-                      Payment: {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Credit/Debit Card'}
-                    </p>
+                    {/* Payment method & payment status */}
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                      <p className="text-xs" style={{ color: C.textMuted }}>
+                        Payment: {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Credit/Debit Card'}
+                      </p>
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full capitalize"
+                        style={{
+                          background: paymentStatusColors[order.paymentStatus || 'pending']?.bg || C.accentLight,
+                          color:      paymentStatusColors[order.paymentStatus || 'pending']?.text || C.accent,
+                        }}
+                      >
+                        {order.paymentStatus || 'pending'}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
