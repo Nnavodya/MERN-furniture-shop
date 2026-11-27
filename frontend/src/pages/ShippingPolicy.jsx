@@ -1,4 +1,3 @@
-import React from 'react'
 import { TbTruck, TbClock, TbMapPin, TbPackage } from 'react-icons/tb'
 
 const C = {

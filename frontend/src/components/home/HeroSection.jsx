@@ -1,5 +1,4 @@
 // v1: Hero Section Component — fixed JSX structure
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbArrowRight, TbPlayerPlay } from 'react-icons/tb'
 import heroImg from '../../assets/Hero.webp'

@@ -1,4 +1,3 @@
-import React from 'react'
 import { TbBrandInstagram, TbBrandFacebook, TbPhone, TbMapPin } from 'react-icons/tb';
 
 const Topbar = () => {

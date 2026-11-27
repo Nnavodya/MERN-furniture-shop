@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useContext } from 'react'
 
 export const WishlistContext = createContext()
 
@@ -6,19 +7,17 @@ export const WishlistContext = createContext()
 export const useWishlist = () => useContext(WishlistContext)
 
 export const WishlistProvider = ({ children }) => {
-  const [wishlist, setWishlist] = useState([])
-
-  // ── Load wishlist from localStorage on first mount ──
-  useEffect(() => {
+  const [wishlist, setWishlist] = useState(() => {
     const saved = localStorage.getItem('wishlist')
     if (saved) {
       try {
-        setWishlist(JSON.parse(saved))
+        return JSON.parse(saved)
       } catch (err) {
         console.error('Failed to load wishlist from localStorage:', err)
       }
     }
-  }, [])
+    return []
+  })
 
   // ── Persist wishlist whenever it changes ──
   useEffect(() => {

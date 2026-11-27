@@ -108,13 +108,15 @@ const Products = () => {
 
   const handleToggleWishlist = (product) => {
     toggleWishlist({
-      id:      product._id,
-      name:    product.name,
-      price:   product.price,
-      emoji:   product.emoji,
+      id:       product._id,
+      name:     product.name,
+      price:    product.price,
+      emoji:    product.emoji,
       imageUrl: product.imageUrl,
-      rating:  product.rating,
-      reviews: product.reviews,
+      stock:    product.stock,
+      inStock:  product.inStock,
+      rating:   product.rating,
+      reviews:  product.reviews,
     })
   }
 

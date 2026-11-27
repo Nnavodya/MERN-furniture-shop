@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { TbPlus, TbEdit, TbTrash, TbSearch, TbX, TbCheck } from 'react-icons/tb'
+import { useState, useEffect } from 'react'
+import { TbPlus, TbEdit, TbTrash, TbSearch, TbX } from 'react-icons/tb'
 import api from '../../api/axios'
 
 const C = {
@@ -17,7 +17,7 @@ const C = {
 const EMPTY_FORM = {
   name: '', category: 'living-room', price: '', oldPrice: '',
   badge: '', emoji: '🪑', description: '', stock: 0, sku: '',
-  imageUrl: '', 
+  imageUrl: '', imagePublicId: '',
 }
 
 const categories = [
@@ -40,6 +40,7 @@ const AdminProducts = () => {
   const [editing, setEditing]   = useState(null) // product being edited
   const [form, setForm]         = useState(EMPTY_FORM)
   const [saving, setSaving]     = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [error, setError]       = useState('')
 
@@ -48,14 +49,21 @@ const AdminProducts = () => {
       setLoading(true)
       const { data } = await api.get('/products')
       setProducts(data)
-    } catch (err) {
+    } catch {
       setError('Failed to load products.')
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => { fetchProducts() }, [])
+  useEffect(() => {
+    let active = true
+    api.get('/products')
+      .then(({ data }) => { if (active) setProducts(data) })
+      .catch(() => { if (active) setError('Failed to load products.') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [])
 
   const openAdd = () => {
     setEditing(null)
@@ -73,9 +81,10 @@ const AdminProducts = () => {
       badge:       product.badge       || '',
       emoji:       product.emoji       || '🪑',
       description: product.description || '',
-      stock:       product.stock !== undefined ? product.stock : (product.inStock ? 1 : 0),
-      sku:         product.sku         || '',
-      imageUrl:    product.imageUrl    || '',
+      stock:         product.stock !== undefined ? product.stock : (product.inStock ? 1 : 0),
+      sku:           product.sku           || '',
+      imageUrl:      product.imageUrl      || '',
+      imagePublicId: product.imagePublicId || '',
     })
     setShowForm(true)
   }
@@ -115,7 +124,7 @@ const AdminProducts = () => {
       await api.delete(`/products/${id}`)
       setDeleteId(null)
       fetchProducts()
-    } catch (err) {
+    } catch {
       setError('Failed to delete product.')
     }
   }
@@ -333,22 +342,33 @@ const AdminProducts = () => {
   <input
     type="file"
     accept="image/*"
+    disabled={uploadingImage}
     onChange={async (e) => {
       const file = e.target.files[0]
       if (!file) return
       const formData = new FormData()
       formData.append('image', file)
+      setUploadingImage(true)
+      setError('')
       try {
         const { data } = await api.post('/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
-        setForm(f => ({ ...f, imageUrl: data.url }))
-      } catch (err) {
+        setForm(f => ({ ...f, imageUrl: data.url, imagePublicId: data.public_id || '' }))
+      } catch {
         setError('Image upload failed.')
+      } finally {
+        setUploadingImage(false)
       }
     }}
-    style={{ ...inputStyle, padding: '6px 12px' }}
+    style={{ ...inputStyle, padding: '6px 12px', opacity: uploadingImage ? 0.6 : 1 }}
   />
+  {uploadingImage && (
+    <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: C.accent }}>
+      <div className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+      Uploading image…
+    </div>
+  )}
   {form.imageUrl && (
     <img
       src={form.imageUrl}
@@ -383,11 +403,11 @@ const AdminProducts = () => {
                   Cancel
                 </button>
                 <button
-                  type="submit" disabled={saving}
+                  type="submit" disabled={saving || uploadingImage}
                   className="flex-1 py-2.5 rounded-lg text-sm font-semibold"
-                  style={{ background: C.accent, color: '#1C0F05', opacity: saving ? 0.7 : 1 }}
+                  style={{ background: C.accent, color: '#1C0F05', opacity: saving || uploadingImage ? 0.7 : 1 }}
                 >
-                  {saving ? 'Saving…' : editing ? 'Update' : 'Add Product'}
+                  {saving ? 'Saving…' : uploadingImage ? 'Uploading…' : editing ? 'Update' : 'Add Product'}
                 </button>
               </div>
             </form>

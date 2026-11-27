@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { TbMapPin, TbPhone, TbMail, TbClock, TbSend } from 'react-icons/tb'
 
 const C = {

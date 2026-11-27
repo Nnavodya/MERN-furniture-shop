@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Product = require('../models/Product')
+const { cloudinary } = require('../config/cloudinary')
 
 const ALLOWED_PRODUCT_FIELDS = [
   'name',
@@ -13,6 +14,7 @@ const ALLOWED_PRODUCT_FIELDS = [
   'stock',
   'sku',
   'imageUrl',
+  'imagePublicId',
 ]
 
 const escapeRegex = (str) => String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -131,6 +133,11 @@ const deleteProduct = async (req, res) => {
     const product = await Product.findByIdAndDelete(req.params.id)
     if (!product) {
       return res.status(404).json({ message: 'Product not found' })
+    }
+    if (product.imagePublicId) {
+      await cloudinary.uploader.destroy(product.imagePublicId).catch((err) => {
+        console.error('Cloudinary cleanup failed:', err.message)
+      })
     }
     res.json({ message: 'Product deleted successfully' })
   } catch (err) {

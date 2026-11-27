@@ -1,4 +1,3 @@
-import React from 'react'
 import { TbLock, TbUser, TbShoppingBag, TbMail } from 'react-icons/tb'
 
 const C = {

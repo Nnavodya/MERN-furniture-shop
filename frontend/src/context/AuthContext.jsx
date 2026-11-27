@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useContext } from 'react'
 import api from '../api/axios'
 
 export const AuthContext = createContext()
@@ -7,26 +8,19 @@ export const AuthContext = createContext()
 export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]       = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  // ── Restore session from localStorage on mount ──
-  // Token + user are trusted from a previous successful login/signup;
-  // we don't re-verify with the server here to keep startup fast.
-  // The axios 401 interceptor clears storage if the token turns out
-  // to be invalid on the next real API call.
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('furnihub_user')
     const savedToken = localStorage.getItem('furnihub_token')
     if (savedUser && savedToken) {
       try {
-        setUser(JSON.parse(savedUser))
+        return JSON.parse(savedUser)
       } catch (err) {
         console.error('Failed to load user session:', err)
       }
     }
-    setLoading(false)
-  }, [])
+    return null
+  })
+  const loading = false
 
   const persistSession = (data) => {
     const sessionUser = { id: data._id, name: data.name, email: data.email, role: data.role }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { TbUser, TbMail, TbLock, TbEye, TbEyeOff, TbArrowRight } from 'react-icons/tb'
 import { useAuth } from '../context/AuthContext'

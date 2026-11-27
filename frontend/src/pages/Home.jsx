@@ -1,5 +1,4 @@
 // v2: Modular Home Page with Separated Components
-import React from 'react'
 import HeroSection         from '../components/home/HeroSection'
 import SpecialOfferBanner  from '../components/home/SpecialOfferBanner'
 import FeaturesBar         from '../components/home/FeaturesBar'

@@ -1,5 +1,4 @@
 // src/components/home/CustomerReviews.jsx
-import React from 'react'
 import { TbStar } from 'react-icons/tb'
 import { testimonials, colors } from './constants'
 

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  TbTrash, TbPlus, TbMinus, TbShoppingCart,
+  TbTrash, TbPlus, TbMinus,
   TbArrowRight, TbTag, TbTruck, TbShieldCheck
 } from 'react-icons/tb'
 import { useCart } from '../../context/CartContext'
@@ -28,10 +28,14 @@ const CartItem = ({ item, onUpdateQty, onRemove }) => (
   >
     {/* Product image */}
     <div
-      className="w-20 h-20 rounded-lg flex items-center justify-center text-3xl shrink-0"
+      className="w-20 h-20 rounded-lg flex items-center justify-center text-3xl shrink-0 overflow-hidden"
       style={{ background: C.accentLight }}
     >
-      {item.emoji || '🪑'}
+      {item.imageUrl ? (
+        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+      ) : (
+        item.emoji || '🪑'
+      )}
     </div>
 
     {/* Product info */}

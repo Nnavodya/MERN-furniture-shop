@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { TbPlus, TbMinus } from 'react-icons/tb'
 
 const C = {

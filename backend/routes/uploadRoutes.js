@@ -24,12 +24,12 @@ router.post('/', protect, adminOnly, handleSingleImageUpload, (req, res) => {
   })
 })
 
-// ── DELETE /api/upload/:public_id — admin only ──
-router.delete('/:public_id', protect, adminOnly, async (req, res) => {
+// ── DELETE /api/upload/:public_id(*) — admin only (supports nested folder IDs) ──
+router.delete('/:public_id(*)', protect, adminOnly, async (req, res) => {
   try {
     await cloudinary.uploader.destroy(req.params.public_id)
     res.json({ message: 'Image deleted' })
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Failed to delete image' })
   }
 })

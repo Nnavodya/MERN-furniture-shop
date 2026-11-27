@@ -1,6 +1,5 @@
-import React from 'react'
 import { Navigate, Link } from 'react-router-dom'
-import { TbUser, TbMail, TbLogout, TbShoppingBag, TbHeart, TbPackage } from 'react-icons/tb'
+import { TbMail, TbLogout, TbShoppingBag, TbHeart, TbPackage } from 'react-icons/tb'
 import { useAuth } from '../context/AuthContext'
 
 const C = {

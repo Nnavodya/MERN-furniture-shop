@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { TbUpload, TbSearch, TbArrowRight, TbStar, TbShoppingCart, TbX } from 'react-icons/tb'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
 
 const C = {
@@ -23,7 +24,9 @@ const RoomAnalyzer = () => {
   const [products, setProducts]   = useState([])
   const [error, setError]         = useState('')
   const fileRef = useRef()
+  const navigate = useNavigate()
   const { addToCart } = useCart()
+  const { isAuthenticated } = useAuth()
 
   const handleFile = (file) => {
     if (!file) return
@@ -40,6 +43,10 @@ const RoomAnalyzer = () => {
   }
 
   const handleAnalyze = async () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/room-analyzer' } })
+      return
+    }
     if (!image) return
     setAnalyzing(true)
     setError('')
@@ -96,6 +103,23 @@ const RoomAnalyzer = () => {
             Upload a photo of your room and our AI will suggest the perfect furniture to match your style.
           </p>
         </div>
+
+        {!isAuthenticated && (
+          <div
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-xl mb-6 text-sm"
+            style={{ background: C.card, border: `1px solid ${C.accentBorder}`, color: C.text }}
+          >
+            <span>Please log in to analyze your room photo with AI.</span>
+            <Link
+              to="/login"
+              state={{ from: '/room-analyzer' }}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold"
+              style={{ background: C.accent, color: '#FFFFFF' }}
+            >
+              Log In
+            </Link>
+          </div>
+        )}
 
         {/* ── Upload Area ── */}
         <div

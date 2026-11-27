@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { TbLock, TbEye, TbEyeOff, TbArrowRight, TbCircleCheck } from 'react-icons/tb'
 import api from '../api/axios'

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbLeaf, TbAward, TbTruck, TbHeartHandshake, TbArrowRight } from 'react-icons/tb'
 

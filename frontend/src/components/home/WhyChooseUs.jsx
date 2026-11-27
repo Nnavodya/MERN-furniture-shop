@@ -1,5 +1,4 @@
 // v1: Why Choose Us Component
-import React from 'react'
 import {
   TbTruck,
   TbLock,

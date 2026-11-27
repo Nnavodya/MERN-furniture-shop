@@ -1,6 +1,5 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
-import { TbX, TbPlus, TbMinus, TbTrash, TbShoppingCart, TbArrowRight, TbTag } from 'react-icons/tb'
+import { TbX, TbPlus, TbMinus, TbTrash, TbShoppingCart, TbArrowRight } from 'react-icons/tb'
 
 const C = {
   bg:           '#FFFFFF',
@@ -167,10 +166,14 @@ const CartDrawer = ({ isOpen, onClose, items = [], onUpdateQty, onRemove }) => {
                 >
                   {/* Product image */}
                   <div
-                    className="w-16 h-16 rounded-lg flex items-center justify-center text-2xl shrink-0"
+                    className="w-16 h-16 rounded-lg flex items-center justify-center text-2xl shrink-0 overflow-hidden"
                     style={{ background: C.accentLight }}
                   >
-                    {item.emoji || '🪑'}
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      item.emoji || '🪑'
+                    )}
                   </div>
 
                   {/* Product info */}

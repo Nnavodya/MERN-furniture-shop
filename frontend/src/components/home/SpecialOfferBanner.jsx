@@ -1,5 +1,4 @@
 // v1: Special Offer Banner Component
-import React from 'react'
 import { Link } from 'react-router-dom'
 
 const SpecialOfferBanner = () => {

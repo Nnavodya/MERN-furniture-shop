@@ -1,5 +1,4 @@
 // v1: Features Bar Component
-import React from 'react'
 import { features, colors } from './constants'
 
 const FeaturesBar = () => {

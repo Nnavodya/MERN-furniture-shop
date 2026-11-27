@@ -1,4 +1,3 @@
-import React from 'react'
 import { TbRefresh, TbShieldCheck, TbPackage, TbMail } from 'react-icons/tb'
 
 const C = {

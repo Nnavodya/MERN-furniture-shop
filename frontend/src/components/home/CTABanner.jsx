@@ -1,5 +1,4 @@
 // src/components/home/CTABanner.jsx
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbArrowRight } from 'react-icons/tb'
 import { colors } from './constants'

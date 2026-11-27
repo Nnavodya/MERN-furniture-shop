@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   TbStar, TbHeart, TbMinus, TbPlus, TbShoppingCart,
@@ -125,13 +125,15 @@ const ProductDetails = () => {
 
   const handleToggleWishlist = () => {
     toggleWishlist({
-      id:      product._id,
-      name:    product.name,
-      price:   product.price,
-      emoji:   product.emoji,
+      id:       product._id,
+      name:     product.name,
+      price:    product.price,
+      emoji:    product.emoji,
       imageUrl: product.imageUrl,
-      rating:  product.rating,
-      reviews: product.reviews,
+      stock:    product.stock,
+      inStock:  product.inStock,
+      rating:   product.rating,
+      reviews:  product.reviews,
     })
   }
 

@@ -1,5 +1,4 @@
 // v1: Room Inspiration Gallery Component
-import React from 'react'
 import { colors } from './constants'
 
 const RoomInspirationGallery = () => {

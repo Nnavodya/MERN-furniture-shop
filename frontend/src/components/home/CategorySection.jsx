@@ -1,5 +1,4 @@
 // v1: Category Section Component
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { TbArrowRight } from 'react-icons/tb'
 import { categories, colors } from './constants'

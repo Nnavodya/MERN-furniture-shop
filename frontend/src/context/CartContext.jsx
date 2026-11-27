@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useContext, useRef } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useContext, useRef } from 'react'
 
 export const CartContext = createContext()
 
@@ -6,22 +7,20 @@ export const CartContext = createContext()
 export const useCart = () => useContext(CartContext)
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([])
-  const [couponCode, setCouponCode] = useState(() => localStorage.getItem('furnihub_coupon') || '')
-  const [cartMessage, setCartMessage] = useState('')
-  const lastAddedRef = useRef({ id: null, at: 0 })
-
-  // ── Load cart from localStorage on first mount ──
-  useEffect(() => {
+  const [cartItems, setCartItems] = useState(() => {
     const saved = localStorage.getItem('cart')
     if (saved) {
       try {
-        setCartItems(JSON.parse(saved))
+        return JSON.parse(saved)
       } catch (err) {
         console.error('Failed to load cart from localStorage:', err)
       }
     }
-  }, [])
+    return []
+  })
+  const [couponCode, setCouponCode] = useState(() => localStorage.getItem('furnihub_coupon') || '')
+  const [cartMessage, setCartMessage] = useState('')
+  const lastAddedRef = useRef({ id: null, at: 0 })
 
   // ── Persist cart & coupon to localStorage whenever they change ──
   useEffect(() => {

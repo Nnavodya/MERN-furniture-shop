@@ -75,6 +75,8 @@ const Sale = () => {
       price:    product.price,
       emoji:    product.emoji,
       imageUrl: product.imageUrl,
+      stock:    product.stock,
+      inStock:  product.inStock,
       rating:   product.rating,
       reviews:  product.reviews,
     })

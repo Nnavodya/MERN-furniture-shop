@@ -1,4 +1,3 @@
-import React from 'react'
 import { TbFileText } from 'react-icons/tb'
 
 const C = {
