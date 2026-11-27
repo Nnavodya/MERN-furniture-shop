@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { TbMapPin, TbPhone, TbMail, TbClock, TbSend } from 'react-icons/tb'
+import api from '../api/axios'
 
 const C = {
   bg:           '#FAF7F4',
@@ -34,19 +35,24 @@ const Contact = () => {
   const [form, setForm]       = useState({ name: '', email: '', subject: '', message: '' })
   const [sent, setSent]       = useState(false)
   const [sending, setSending] = useState(false)
+  const [error, setError]     = useState('')
 
   const valid = form.name && form.email && form.message
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!valid) return
     setSending(true)
-    // ── Simulated submission — replace with POST /api/contact once backend is ready ──
-    setTimeout(() => {
-      setSending(false)
+    setError('')
+    try {
+      await api.post('/contact', form)
       setSent(true)
       setForm({ name: '', email: '', subject: '', message: '' })
-    }, 900)
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send message. Please try again.')
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -107,6 +113,14 @@ const Contact = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {error && (
+                <div
+                  className="text-xs px-3 py-2.5 rounded-lg"
+                  style={{ background: 'rgba(229,57,53,0.08)', color: '#C62828', border: '1px solid rgba(229,57,53,0.2)' }}
+                >
+                  {error}
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field
                   label="Your Name" placeholder="Nethmi Rajapaksha"

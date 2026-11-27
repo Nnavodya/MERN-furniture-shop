@@ -9,9 +9,11 @@ const orderRoutes   = require('./routes/orderRoutes')
 const uploadRoutes  = require('./routes/uploadRoutes')
 const analyzeRoutes = require('./routes/analyzeRoutes')
 const paymentRoutes = require('./routes/paymentRoutes')
+const contactRoutes = require('./routes/contactRoutes')
 
 const app = express()
 const isProd = process.env.NODE_ENV === 'production'
+app.set('trust proxy', 1)
 
 // ── Security middleware ──
 app.use(helmet())
@@ -41,6 +43,7 @@ app.use('/api/orders',   orderRoutes)
 app.use('/api/upload',   uploadRoutes)
 app.use('/api/analyze',  analyzeLimiter, analyzeRoutes)
 app.use('/api/payment',  paymentRoutes)
+app.use('/api/contact',  contactRoutes)
 
 // ── Health check ──
 app.get('/', (req, res) => {

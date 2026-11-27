@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import api from "../../api/axios";
 import {
   TbArmchair,
   TbBrandFacebook,
@@ -105,14 +106,19 @@ const Footer = () => {
   const [email,  setEmail]  = useState("");
   const [status, setStatus] = useState("idle"); // idle | success | error
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setStatus("error");
       return;
     }
-    setStatus("success");
-    setEmail("");
-    setTimeout(() => setStatus("idle"), 4000);
+    try {
+      await api.post("/contact/newsletter", { email });
+      setStatus("success");
+      setEmail("");
+      setTimeout(() => setStatus("idle"), 4000);
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (

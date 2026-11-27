@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider, useCart } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
 import { WishlistProvider, useWishlist } from './context/WishlistContext'
@@ -100,9 +100,9 @@ function AppShell() {
           <Route path="/shipping-policy" element={<ShippingPolicy />} />
           <Route path="/returns"         element={<Returns />}        />
           <Route path="/privacy-policy"  element={<PrivacyPolicy />}  />
-          <Route path="/terms"           element={<Terms />}          />    
-          <Route path="*"            element={<NotFound />}       />
-          <Route path="/room-analyzer" element={<RoomAnalyzer />} />
+          <Route path="/terms"           element={<Terms />}          />
+          <Route path="/room-analyzer"   element={<RoomAnalyzer />}   />
+          <Route path="*"                element={<NotFound />}       />
         </Route>
 
         {/* ── Admin routes — own layout, no Header/Footer ── */}
@@ -112,6 +112,7 @@ function AppShell() {
             <AdminGuard>
               <AdminLayout>
                 <Routes>
+                  <Route index            element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="products"  element={<AdminProducts />}  />
                   <Route path="orders"    element={<AdminOrders />}    />
